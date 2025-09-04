@@ -122,4 +122,4 @@ license.GCM_TAG_LENGTH=128
 
 
 ## 🖥️ 데모 영상
-https://github.com/YeeDochi/License/issues/1#issue-3383845106
+[https://github.com/YeeDochi/License/issues/1#issue-3383845106](https://github.com/user-attachments/assets/8af0e98e-f430-4a37-9aa9-7d620d34da00)
