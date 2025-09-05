@@ -323,3 +323,31 @@ public class BoardSerialSerializationHandler implements LicenseFieldSerializatio
 | **직렬화 구조** | `[데이터 존재 여부(1바이트)]` `[실제 int 값(4바이트)]`         | `[데이터 존재 여부(1바이트)]` `[문자열 길이(2바이트)]` `[실제 문자열 바이트]` |
 | **구현** | 핸들러 내에서 직접 처리                                      | `StringDataReader`에 의존하여 처리                             |
 
+
+## 4. 작성이 끝난후
+
+작성이 완료되면 해당 헨들러들은 `LicanseData.java` 에 등록되어야 합니다
+
+```java
+ @PostConstruct
+    public void initialize() {
+        sHandlers = List.of(
+                // 새로운 필드 핸들러를 여기에 추가!
+                new CoreCountSerializationHandler(),
+                new SocketCountSerializationHandler(),
+                new BoardSerialSerializationHandler(stringDataReader),
+                new MacAddressSerializationHandler(stringDataReader),
+                new ExpireDateSerializationHandler()
+        );
+
+        dHandlers = List.of(
+                // 새로운 필드 핸들러를 여기에 추가!
+                new CoreCountDeserializationHandler(),
+                new SocketCountDeserializationHandler(),
+                new BoardSerialDeserializationHandler(stringDataReader),
+                new MacAddressDeserializationHandler(stringDataReader),
+                new ExpireDateDeserializationHandler()
+        );
+    }
+```
+추가하는 헨들러는 쌍을 이루어야합니다.
