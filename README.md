@@ -314,17 +314,7 @@ public class BoardSerialSerializationHandler implements LicenseFieldSerializatio
 
 ---
 
-## 3. `int`와 `String`의 주요 차이점 요약
-
-| 구분          | `int`                                                        | `String`                                                     |
-| :------------ | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| **길이** | **고정 길이** (4바이트)                                      | **가변 길이** |
-| **읽기/쓰기** | `DataInputStream.readInt()`<br>`DataOutputStream.writeInt()` | 별도의 **`StringDataReader` 헬퍼 클래스** 사용               |
-| **직렬화 구조** | `[데이터 존재 여부(1바이트)]` `[실제 int 값(4바이트)]`         | `[데이터 존재 여부(1바이트)]` `[문자열 길이(2바이트)]` `[실제 문자열 바이트]` |
-| **구현** | 핸들러 내에서 직접 처리                                      | `StringDataReader`에 의존하여 처리                             |
-
-
-## 4. 작성이 끝난후
+## 3. 작성이 끝난후
 
 작성이 완료되면 해당 헨들러들은 `LicanseData.java` 에 등록되어야 합니다
 
