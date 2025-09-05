@@ -9,9 +9,11 @@ import java.time.LocalDate;
 
 @RequiredArgsConstructor
 public class ExpireDateDeserializationHandler implements LicenseFieldDeserializationHandler {
-    private static final int BITMASK = 16;
-    private static final LocalDate EPOCH_DATE = LocalDate.of(2020, 1, 1);
-
+    private final int BITMASK = 16;
+    private final LocalDate EPOCH_DATE = LocalDate.of(2020, 1, 1);
+    public int getBitmask(){
+        return BITMASK;
+    }
     @Override
     public void deserialize(DataInputStream dis, LicenseDTO.Builder builder) throws IOException {
         if ((builder.build().getType() & BITMASK) != 0) {

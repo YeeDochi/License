@@ -22,15 +22,6 @@ import lombok.NoArgsConstructor;
 @Getter
 public class LicenseEntity {
 
-    public LicenseEntity(int coreCount, int socketCount, String boardSerial, String macAddress, String expireDate, int type) {
-        this.coreCount = coreCount;
-        this.socketCount = socketCount;
-        this.boardSerial = boardSerial;
-        this.macAddress = macAddress;
-        this.expireDate = expireDate;
-        this.type = type;
-    }
-
     public LicenseEntity(LicenseDTO dto) {
         this.coreCount = dto.getCoreCount();
         this.socketCount = dto.getSocketCount();
@@ -52,18 +43,18 @@ public class LicenseEntity {
     private String expireDate;
     private Integer type;
 
-      @CreationTimestamp
+    @CreationTimestamp
     private Timestamp createDate;
 
     public LicenseDTO toDTO() {
-    return LicenseDTO.builder()
-            .coreCount(this.coreCount)
-            .socketCount(this.socketCount)
-            .boardSerial(this.boardSerial)
-            .macAddress(this.macAddress)
-            .expireDate(this.expireDate)
-            .type(this.type)
-            .build();
-}
+            return LicenseDTO.builder()
+                    .coreCount(this.coreCount)
+                    .socketCount(this.socketCount)
+                    .boardSerial(this.boardSerial)
+                    .macAddress(this.macAddress)
+                    .expireDate(this.expireDate)
+                    .type(this.type)
+                    .build();
+    }
 }
 

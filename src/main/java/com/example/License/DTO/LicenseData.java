@@ -3,8 +3,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.example.License.Handler.Decryption.*;
 import com.example.License.Handler.Encryption.*;
@@ -26,23 +29,32 @@ public class LicenseData {
 
     @PostConstruct
     public void initialize() {
-        sHandlers = List.of(
-                // 새로운 필드 핸들러를 여기에 추가!
-                new CoreCountSerializationHandler(),
-                new SocketCountSerializationHandler(),
-                new BoardSerialSerializationHandler(stringDataReader),
-                new MacAddressSerializationHandler(stringDataReader),
-                new ExpireDateSerializationHandler()
-        );
+        // sHandlers 리스트를 getBitmask()의 오름차순으로 정렬
+        sHandlers = Stream.of(
+                        // 새로운 필드 핸들러를 여기에 추가!
+                        new SocketCountSerializationHandler(),
+                        new BoardSerialSerializationHandler(stringDataReader),
+                        new MacAddressSerializationHandler(stringDataReader),
+                        new ExpireDateSerializationHandler(),
+                        new CoreCountSerializationHandler() // 1 번을 가장 뒤로 했을때
+                )
+                .sorted(Comparator.comparingInt(LicenseFieldSerializationHandler::getBitmask))  //getBitmask() 기준으로 정렬
+                .collect(Collectors.toList());
+        this.sHandlers = createPaddedList(sHandlers, DummySerializationHandler::new);
 
-        dHandlers = List.of(
-                // 새로운 필드 핸들러를 여기에 추가!
-                new CoreCountDeserializationHandler(),
-                new SocketCountDeserializationHandler(),
-                new BoardSerialDeserializationHandler(stringDataReader),
-                new MacAddressDeserializationHandler(stringDataReader),
-                new ExpireDateDeserializationHandler()
-        );
+        // dHandlers 리스트를 getBitmask()의 오름차순으로 정렬
+        dHandlers = Stream.of(
+                        // 새로운 필드 핸들러를 여기에 추가!
+                        new CoreCountDeserializationHandler(),
+                        new SocketCountDeserializationHandler(),
+                        new BoardSerialDeserializationHandler(stringDataReader),
+                        new MacAddressDeserializationHandler(stringDataReader),
+                        new ExpireDateDeserializationHandler()
+                )
+                .sorted(Comparator.comparingInt(LicenseFieldDeserializationHandler::getBitmask)) // getBitmask() 기준으로 정렬
+                .collect(Collectors.toList());
+        this.dHandlers = createPaddedList(dHandlers, DummyDeserializationHandler::new);
+
     }
     public List<LicenseFieldSerializationHandler> SHandlers() {
         return this.sHandlers;
@@ -76,5 +88,38 @@ public class LicenseData {
         }
 
         return builder.build();
+    }
+
+    private <T> List<T> createPaddedList(List<? extends T> sortedHandlers, java.util.function.IntFunction<T> dummyFactory) {
+        if (sortedHandlers.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<T> finalList = new ArrayList<>();
+        // 기대하는 비트마스크 값 (1, 2, 4, 8, ...)
+        long expectedBitmask = 1;
+        // 비트 마스크 추출 메소드
+        java.util.function.ToIntFunction<T> getBitmaskFunc = (handler) -> {
+            if (handler instanceof LicenseFieldSerializationHandler) {
+                return ((LicenseFieldSerializationHandler) handler).getBitmask();
+            } else if (handler instanceof LicenseFieldDeserializationHandler) {
+                return ((LicenseFieldDeserializationHandler) handler).getBitmask();
+            }
+            return 0; 
+        };
+        for (T handler : sortedHandlers) {
+            int currentBitmask = getBitmaskFunc.applyAsInt(handler);
+            // 현재 핸들러의 비트마스크가 기대값보다 클 경우, 그 사이를 더미로 채운다
+            while (expectedBitmask < currentBitmask) {
+                finalList.add(dummyFactory.apply((int) expectedBitmask));
+                expectedBitmask *= 2;
+            }
+            if (expectedBitmask != currentBitmask) {
+                throw new IllegalStateException();
+            }
+            finalList.add(handler);
+            expectedBitmask *= 2;
+        }
+
+        return finalList;
     }
 }

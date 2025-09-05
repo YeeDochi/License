@@ -9,7 +9,9 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class SocketCountSerializationHandler implements LicenseFieldSerializationHandler {
     private static final int BITMASK = 2;
-
+    public int getBitmask(){
+        return BITMASK;
+    }
     @Override
     public void serialize(DataOutputStream dos, LicenseDTO dto) throws IOException {
         // bitmask에 포함될 때만 처리

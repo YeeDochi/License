@@ -8,8 +8,10 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class CoreCountSerializationHandler implements LicenseFieldSerializationHandler {
-    private static final int BITMASK = 1;
-
+    private final int BITMASK = 1;
+    public int getBitmask(){
+        return BITMASK;
+    }
     @Override
     public void serialize(DataOutputStream dos, LicenseDTO dto) throws IOException {
         // bitmask에 포함될 때만 처리

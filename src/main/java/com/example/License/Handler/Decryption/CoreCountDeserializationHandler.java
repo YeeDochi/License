@@ -8,8 +8,10 @@ import java.io.IOException;
 
 @RequiredArgsConstructor
 public class CoreCountDeserializationHandler implements LicenseFieldDeserializationHandler {
-    private static final int BITMASK = 1;
-
+    private final int BITMASK = 1;
+    public int getBitmask(){
+        return BITMASK;
+    }
     @Override
     public void deserialize(DataInputStream dis, Builder builder) throws IOException {
        if ((builder.build().getType() & BITMASK) != 0) {

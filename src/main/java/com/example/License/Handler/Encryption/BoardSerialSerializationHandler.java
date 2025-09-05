@@ -9,8 +9,11 @@ import java.io.IOException;
 
 @RequiredArgsConstructor
 public class BoardSerialSerializationHandler implements LicenseFieldSerializationHandler {
-    private static final int BITMASK = 4;
+    private final int BITMASK = 4;
     private final StringDataReader reader;
+    public int getBitmask(){
+        return BITMASK;
+    }
     @Override
     public void serialize(DataOutputStream dos, LicenseDTO dto) throws IOException {
         if ((dto.getType() & BITMASK) != 0 && dto.getBoardSerial() != null) {

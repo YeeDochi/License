@@ -9,9 +9,11 @@ import java.io.IOException;
 
 @RequiredArgsConstructor
 public class MacAddressDeserializationHandler implements LicenseFieldDeserializationHandler {
-    private static final int BITMASK = 8;
+    private final int BITMASK = 8;
     private final StringDataReader reader;
-
+    public int getBitmask(){
+        return BITMASK;
+    }
     @Override
     public void deserialize(DataInputStream dis, LicenseDTO.Builder builder) throws IOException {
         if ((builder.build().getType() & BITMASK) != 0) {

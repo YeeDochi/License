@@ -8,18 +8,18 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 @RequiredArgsConstructor
-public class BoardSerialDeserializationHandler implements LicenseFieldDeserializationHandler {
-    private final int BITMASK = 4;
-    private final StringDataReader reader;
+public class DummyDeserializationHandler implements LicenseFieldDeserializationHandler {
+    private int BITMASK;
+
+    public DummyDeserializationHandler(int BITMASK){this.BITMASK=BITMASK;}
     public int getBitmask(){
         return BITMASK;
     }
+
     @Override
     public void deserialize(DataInputStream dis, LicenseDTO.Builder builder) throws IOException {
         if ((builder.build().getType() & BITMASK) != 0) {
-            if (dis.readBoolean()) {
-                builder.boardSerial(reader.readString(dis));
-            }
+           // 아무 행동도 하지 않음
         }
     }
 

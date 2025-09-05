@@ -8,8 +8,10 @@ import java.io.IOException;
 
 @RequiredArgsConstructor
 public class SocketCountDeserializationHandler implements LicenseFieldDeserializationHandler {
-    private static final int BITMASK = 2;
-
+    private final int BITMASK = 2;
+    public int getBitmask(){
+        return BITMASK;
+    }
     @Override
     public void deserialize(DataInputStream dis, Builder builder) throws IOException {
        if ((builder.build().getType() & BITMASK) != 0) {

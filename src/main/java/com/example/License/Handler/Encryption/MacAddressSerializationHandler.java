@@ -11,6 +11,9 @@ import java.io.IOException;
 public class MacAddressSerializationHandler implements LicenseFieldSerializationHandler {
     private static final int BITMASK = 8;
     private final StringDataReader reader;
+    public int getBitmask(){
+        return BITMASK;
+    }
     @Override
     public void serialize(DataOutputStream dos, LicenseDTO dto) throws IOException {
         if ((dto.getType() & BITMASK) != 0 && dto.getMacAddress() != null) {

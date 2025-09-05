@@ -10,9 +10,12 @@ import java.time.temporal.ChronoUnit;
 
 @RequiredArgsConstructor
 public class ExpireDateSerializationHandler implements LicenseFieldSerializationHandler {
-    private static final int BITMASK = 16;
-    private static final LocalDate EPOCH_DATE = LocalDate.of(2020, 1, 1);
+    private final int BITMASK = 16;
+    private final LocalDate EPOCH_DATE = LocalDate.of(2020, 1, 1);
 
+    public int getBitmask(){
+        return BITMASK;
+    }
     @Override
     public void serialize(DataOutputStream dos, LicenseDTO dto) throws IOException {
         if ((dto.getType() & BITMASK) != 0 && dto.getExpireDate() != null) {

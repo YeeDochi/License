@@ -53,14 +53,14 @@ public class LicenseController {
     LicenseDTO dto = licenseEntity.toDTO();
 
     // 3. 변환된 DTO를 서비스에 전달
-    String formatted = formattedLicenseService.createLicenseKey(dto,1);
+    String formatted = formattedLicenseService.createLicenseKey(dto);
     return ResponseEntity.ok(formatted);
     }
 
    
     @GetMapping("/decode")
     public ResponseEntity<LicenseDTO> decodeLicense(@RequestParam String licenseKey) throws Exception {
-        LicenseDTO decoded = formattedLicenseService.decodeLicenseKey(licenseKey,1);
+        LicenseDTO decoded = formattedLicenseService.decodeLicenseKey(licenseKey);
         return ResponseEntity.ok(decoded);
     }
 
