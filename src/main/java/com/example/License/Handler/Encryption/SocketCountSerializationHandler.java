@@ -1,13 +1,11 @@
-package com.example.License.Handler;
+package com.example.License.Handler.Encryption;
 
 import com.example.License.DTO.LicenseDTO;
-import com.example.License.DTO.LicenseDTO.Builder;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class SocketCountHandler implements LicenseFieldHandler {
+public class SocketCountSerializationHandler implements LicenseFieldSerializationHandler {
     private static final int BITMASK = 2;
 
     @Override
@@ -15,18 +13,11 @@ public class SocketCountHandler implements LicenseFieldHandler {
         // bitmask에 포함될 때만 처리
         if ((dto.getType() & BITMASK) != 0 && dto.getSocketCount() != null) {
             dos.writeBoolean(true);
-            dos.writeInt(dto.getCoreCount());
+            dos.writeInt(dto.getSocketCount());
         } else if ((dto.getType() & BITMASK) != 0) {
             dos.writeBoolean(false);
         }
     }
 
-    @Override
-    public void deserialize(DataInputStream dis, Builder builder) throws IOException {
-       if ((builder.build().getType() & BITMASK) != 0) {
-            if (dis.readBoolean()) {
-                builder.socketCount(dis.readInt());
-            }
-        }
-    }
+
 }

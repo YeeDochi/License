@@ -10,7 +10,7 @@ Spring Boot와 Docker를 기반으로 구축되었으며, 비트마스크를 활
 
 * **동적 라이선스 생성**: `Core Count`, `MAC 주소` 등 다양한 하드웨어 정보를 선택적으로 포함하여 라이선스를 생성합니다.
 * **비트마스크 제어**: 웹 UI의 체크박스를 통해 라이선스에 포함될 속성을 직관적으로 제어하고, 해당 조합을 비트마스크 값으로 자동 계산합니다.
-* **안전한 키 발급**: 생성된 라이선스 정보는 **AES-GCM** 방식으로 암호화되어 안전한 Base32 포맷의 라이선스 키로 발급됩니다.
+* **안전한 키 발급**: 생성된 라이선스 정보는 **AES-GCM** 방식, 혹은 **RSA** 방식으로 암호화되어 안전한 Base32 포맷의 라이선스 키로 발급됩니다.
 * **라이선스 키 검증**: 발급된 키를 다시 해독하여 포함된 라이선스 정보를 확인하고 유효성을 검증합니다.
 * **컨테이너 기반 환경**: `Docker`와 `Docker Compose`를 사용하여 개발 및 배포 환경을 일관성 있게 관리합니다.
 
@@ -57,10 +57,14 @@ spring.jpa.properties.hibernate.format_sql=true
 # ==================================
 # =      LICENSE KEY CONFIGURATION =
 # ==================================
-# 32바이트 길이의 강력한 비밀 키로 변경하세요.
-license.SECRET_KEY=YourSuperSecretKeyForLicenseEncrypt123
+# AES/GCM
+license.SECRET_KEY= 공유키  #반드시 16,32 같이 2의 배수인 바이트여야합니다.
 license.GCM_IV_LENGTH=12
 license.GCM_TAG_LENGTH=128
+# RSA
+license.private-key = 비밀키
+license.public-key = 공유키
+
 ```
 ### 3. 프로젝트 빌드 및 실행
 
@@ -70,7 +74,7 @@ license.GCM_TAG_LENGTH=128
     프로젝트의 루트 디렉토리에서 아래 명령어를 실행하여 애플리케이션을 빌드합니다.
 
     ```bash
-    ./gradlew build
+    ./gradlew build -x test
     ```
 
 2.  **Docker Compose로 실행**

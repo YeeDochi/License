@@ -1,13 +1,11 @@
-package com.example.License.Handler;
+package com.example.License.Handler.Encryption;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
 import com.example.License.DTO.LicenseDTO;
-import com.example.License.DTO.LicenseDTO.Builder;
 
-public class CoreCountHandler implements LicenseFieldHandler {
+public class CoreCountSerializationHandler implements LicenseFieldSerializationHandler {
     private static final int BITMASK = 1;
 
     @Override
@@ -21,12 +19,4 @@ public class CoreCountHandler implements LicenseFieldHandler {
         }
     }
 
-    @Override
-    public void deserialize(DataInputStream dis, Builder builder) throws IOException {
-       if ((builder.build().getType() & BITMASK) != 0) {
-            if (dis.readBoolean()) {
-                builder.coreCount(dis.readInt());
-            }
-        }
-    }
 }

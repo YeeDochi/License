@@ -5,11 +5,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import com.example.License.Handler.*;
-
+import com.example.License.Handler.Decryption.*;
+import com.example.License.Handler.Encryption.*;
 
 
 // DTO의 데이터를 고정 길이 바이트 배열로 변환하는 클래스
@@ -20,13 +19,22 @@ public class LicenseData {
 
     
 
-     private static final List<LicenseFieldHandler> HANDLERS = List.of(
+     private static final List<LicenseFieldSerializationHandler> SHANDLERS = List.of(
         // 새로운 필드 핸들러를 여기에 추가!
-        new CoreCountHandler(),
-        new SocketCountHandler(),
-        new BoardSerialHandler(),
-        new MacAddressHandler(),
-        new ExpireDateHandler()
+        new CoreCountSerializationHandler(),
+        new SocketCountSerializationHandler(),
+        new BoardSerialSerializationHandler(),
+        new MacAddressSerializationHandler(),
+        new ExpireDateSerializationHandler()
+    );
+
+    private static final List<LicenseFieldDeserializationHandler> DHANDLERS = List.of(
+            // 새로운 필드 핸들러를 여기에 추가!
+            new CoreCountDeserializationHandler(),
+            new SocketCountDeserializationHandler(),
+            new BoardSerialDeserializationHandler(),
+            new MacAddressDeserializationHandler(),
+            new ExpireDateDeserializationHandler()
     );
 
     public static byte[] toByteArray(LicenseDTO dto) throws java.io.IOException {
@@ -34,7 +42,7 @@ public class LicenseData {
         DataOutputStream dos = new DataOutputStream(baos);
 
         dos.writeInt(dto.getType()); // 타입은 먼저 쓴다.
-        for (LicenseFieldHandler handler : HANDLERS) {
+        for (LicenseFieldSerializationHandler handler : SHANDLERS) {
             handler.serialize(dos, dto);
         }
         return baos.toByteArray();
@@ -48,24 +56,9 @@ public class LicenseData {
 
         int typeInt = dis.readInt();
         LicenseDTO.Builder builder = LicenseDTO.builder().type(typeInt);
-        for (LicenseFieldHandler handler : HANDLERS) {
+        for (LicenseFieldDeserializationHandler handler : DHANDLERS) {
             handler.deserialize(dis, builder);
         }
-
-        // //임시 변수
-        // Integer coreCount = (typeInt & 1) != 0 ? dis.readInt() : null;
-        // Integer socketCount = (typeInt & 2) != 0 ? dis.readInt() : null;
-        // String boardSerial = (typeInt & 4) != 0 ? readString(dis) : null;
-        // String macAddress = (typeInt & 8) != 0 ? readString(dis) : null;
-        // Integer tempDays = (typeInt & 16) != 0 ? dis.readInt() : null;
-        // String expireDate = tempDays != null ? EPOCH_DATE.plusDays(tempDays).toString() : null;
-
-        /* 
-            추후 필드 추가 가능
-            예: String newField = (typeInt & 32) != 0 ? readString(dis) : null;
-            예: Integer anotherField = (typeInt & 64) != 0 ? dis.readInt() : null;
-            등등
-            */
 
         return builder.build();
     }

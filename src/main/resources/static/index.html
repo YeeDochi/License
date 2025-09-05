@@ -392,10 +392,8 @@
 
             if (checkbox.checked) {
                 currentType |= bitmaskValue;
-                if (targetInput) targetInput.disabled = false;
             } else {
                 if (targetInput) {
-                    targetInput.disabled = true;
                     targetInput.value = '';
                 }
             }

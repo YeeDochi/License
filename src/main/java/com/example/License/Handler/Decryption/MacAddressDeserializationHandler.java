@@ -1,23 +1,13 @@
-package com.example.License.Handler;
+package com.example.License.Handler.Decryption;
 
 import com.example.License.DTO.LicenseDTO;
+
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class MacAddressHandler implements LicenseFieldHandler {
+public class MacAddressDeserializationHandler implements LicenseFieldDeserializationHandler {
     private static final int BITMASK = 8;
-
-    @Override
-    public void serialize(DataOutputStream dos, LicenseDTO dto) throws IOException {
-        if ((dto.getType() & BITMASK) != 0 && dto.getMacAddress() != null) {
-            dos.writeBoolean(true);
-            writeString(dos, dto.getMacAddress());
-        } else if ((dto.getType() & BITMASK) != 0) {
-            dos.writeBoolean(false);
-        }
-    }
 
     @Override
     public void deserialize(DataInputStream dis, LicenseDTO.Builder builder) throws IOException {
@@ -26,12 +16,6 @@ public class MacAddressHandler implements LicenseFieldHandler {
                 builder.macAddress(readString(dis));
             }
         }
-    }
-
-    private void writeString(DataOutputStream dos, String str) throws IOException {
-        byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
-        dos.writeShort(bytes.length);
-        dos.write(bytes);
     }
 
     private String readString(DataInputStream dis) throws IOException {
