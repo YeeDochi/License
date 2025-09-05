@@ -18,17 +18,12 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class LicenseData {
-    
-    // 기준 날짜 (Epoch) - 이 날짜로부터 며칠이 지났는지를 저장 (좀더 효율적) 
-    private static final LocalDate EPOCH_DATE = LocalDate.of(2020, 1, 1);
 
     private final StringDataReader stringDataReader;
 
-    // static 키워드 제거
     private List<LicenseFieldSerializationHandler> sHandlers;
     private List<LicenseFieldDeserializationHandler> dHandlers;
 
-    // 의존성 주입이 완료된 후 이 메서드가 호출됨
     @PostConstruct
     public void initialize() {
         sHandlers = List.of(
@@ -56,7 +51,7 @@ public class LicenseData {
     public List<LicenseFieldDeserializationHandler> DHandlers() {
         return this.dHandlers;
     }
-
+    // LicenseDTO로부터 rawData 생성 (직렬화)
     public byte[] toByteArray(LicenseDTO dto) throws java.io.IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
