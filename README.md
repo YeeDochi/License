@@ -87,8 +87,7 @@ license.public-key = 공유키
     이 명령어는 `mysql` 데이터베이스 컨테이너와 `spring_app` 애플리케이션 컨테이너를 빌드하고 실행합니다.
 
 3.  **실행 확인**
-    * 웹 브라우저에서 `http://localhost:8081` 로 접속하여 "WhiteLabel Error Page"가 나오면 서버가 정상적으로 실행된 것입니다.
-    * 함께 제공된 `license-tool-final.html` 파일을 브라우저에서 열어 API를 테스트할 수 있습니다.
+    * 웹 브라우저에서 `http://localhost:8081` 로 접속하여 "License Key System"가 나오면 서버가 정상적으로 실행된 것입니다.
 
 ---
 
