@@ -1,12 +1,14 @@
 package com.example.License.Handler.Encryption;
 
 import com.example.License.DTO.LicenseDTO;
+import lombok.RequiredArgsConstructor;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
+@RequiredArgsConstructor
 public class ExpireDateSerializationHandler implements LicenseFieldSerializationHandler {
     private static final int BITMASK = 16;
     private static final LocalDate EPOCH_DATE = LocalDate.of(2020, 1, 1);

@@ -1,27 +1,23 @@
 package com.example.License.Handler.Decryption;
 
 import com.example.License.DTO.LicenseDTO;
+import com.example.License.Handler.StringDataReader;
+import lombok.RequiredArgsConstructor;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
+@RequiredArgsConstructor
 public class BoardSerialDeserializationHandler implements LicenseFieldDeserializationHandler {
     private static final int BITMASK = 4;
-
+    private final StringDataReader reader;
     @Override
     public void deserialize(DataInputStream dis, LicenseDTO.Builder builder) throws IOException {
         if ((builder.build().getType() & BITMASK) != 0) {
             if (dis.readBoolean()) {
-                builder.boardSerial(readString(dis));
+                builder.boardSerial(reader.readString(dis));
             }
         }
     }
 
-    private String readString(DataInputStream dis) throws IOException {
-        short length = dis.readShort();
-        byte[] bytes = new byte[length];
-        dis.readFully(bytes);
-        return new String(bytes, StandardCharsets.UTF_8);
-    }
 }

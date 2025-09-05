@@ -4,7 +4,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import com.example.License.DTO.LicenseDTO;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public class CoreCountSerializationHandler implements LicenseFieldSerializationHandler {
     private static final int BITMASK = 1;
 

@@ -23,9 +23,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FormattedLicenseService {
 
-    private static final int DEFAULT_CHUNK_SIZE = 8; // 8글자씩 끊어서 포멧팅
-    private static final String SYMMETRIC_ALGORITHM = "AES/GCM/NoPadding"; // AES/GCM 대칭키 알고리즘
-    private static final String ASYMMETRIC_SIGNATURE_ALGORITHM = "SHA256withRSA"; // RSA 서명 알고리즘
+    private final int DEFAULT_CHUNK_SIZE = 8; // 8글자씩 끊어서 포멧팅
+    private final String SYMMETRIC_ALGORITHM = "AES/GCM/NoPadding"; // AES/GCM 대칭키 알고리즘
+    private final String ASYMMETRIC_SIGNATURE_ALGORITHM = "SHA256withRSA"; // RSA 서명 알고리즘
 
     // 대칭키 방식때 사용되는 변수들
     @Value("${license.SECRET_KEY}")
@@ -36,11 +36,10 @@ public class FormattedLicenseService {
     private int GCM_TAG_LENGTH;
 
     private final KeyLoader keyLoader;
-
+    private final LicenseData data;
     public String createLicenseKey(LicenseDTO dto) throws Exception { // 대칭키 방식
         System.out.println("CreateKey DTO val: " + dto);
         // DTO를 압축된 바이트 배열로 변환
-        LicenseData data = new LicenseData();
         byte[] rawData = data.toByteArray(dto);
 
         // AES/GCM 암호화 
@@ -65,7 +64,6 @@ public class FormattedLicenseService {
    public String createLicenseKey(LicenseDTO dto, int temp) throws Exception { // 비대칭키 방식
         System.out.println("CreateKey DTO val: " + dto+", temp: "+temp);
         // DTO를 압축된 바이트 배열로 변환
-        LicenseData data = new LicenseData();
         byte[] rawData = data.toByteArray(dto);
         int dataLength = rawData.length;
         PrivateKey privateKey = keyLoader.loadPrivateKey();
@@ -106,7 +104,7 @@ public class FormattedLicenseService {
         cipher.init(Cipher.DECRYPT_MODE, keySpec, gcmSpec);
         byte[] decryptedData = cipher.doFinal(encryptedData);
        
-        return LicenseData.fromByteArray(decryptedData);
+        return data.fromByteArray(decryptedData);
     }
 
      public LicenseDTO decodeLicenseKey(String formattedKey,int temp) throws Exception { // 대칭키 디코딩
@@ -132,7 +130,7 @@ public class FormattedLicenseService {
         if (isValid) {
             System.out.println("유효한 라이선스입니다.");
             // 원본 데이터를 DTO로 변환하여 반환
-            return LicenseData.fromByteArray(rawData);
+            return data.fromByteArray(rawData);
         } else {
             System.out.println("위조된 라이선스입니다!");
             throw new SecurityException("Invalid license key signature.");

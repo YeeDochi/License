@@ -1,11 +1,13 @@
 package com.example.License.Handler.Decryption;
 
 import com.example.License.DTO.LicenseDTO;
+import lombok.RequiredArgsConstructor;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 
+@RequiredArgsConstructor
 public class ExpireDateDeserializationHandler implements LicenseFieldDeserializationHandler {
     private static final int BITMASK = 16;
     private static final LocalDate EPOCH_DATE = LocalDate.of(2020, 1, 1);

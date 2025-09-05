@@ -1,9 +1,12 @@
 package com.example.License.Handler.Decryption;
 
 import com.example.License.DTO.LicenseDTO.Builder;
+import lombok.RequiredArgsConstructor;
+
 import java.io.DataInputStream;
 import java.io.IOException;
 
+@RequiredArgsConstructor
 public class SocketCountDeserializationHandler implements LicenseFieldDeserializationHandler {
     private static final int BITMASK = 2;
 
