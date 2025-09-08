@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package com.example.license;
+
+option java_package = "com.example.License.Proto";
+option java_outer_classname = "LicenseProtos";
+
+message License {
+  int32 type = 1;
+  int32 core_count = 2;
+  int32 socket_count = 3;
+  string board_serial = 4;
+  string mac_address = 5;
+  string expire_date = 6; // long 타입은 int64로 표현
+}

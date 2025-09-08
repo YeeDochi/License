@@ -2,6 +2,8 @@ package com.example.License.Entity;
 
 import java.sql.Timestamp;
 
+import com.example.License.DTO.LicenseDTORequest;
+import com.example.License.Proto.LicenseProtos;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.example.License.DTO.LicenseDTO;
@@ -22,13 +24,14 @@ import lombok.NoArgsConstructor;
 @Getter
 public class LicenseEntity {
 
-    public LicenseEntity(LicenseDTO dto) {
-        this.coreCount = dto.getCoreCount();
-        this.socketCount = dto.getSocketCount();
-        this.boardSerial = dto.getBoardSerial();
-        this.macAddress = dto.getMacAddress();
-        this.expireDate = dto.getExpireDate();
-        this.type = dto.getType();
+
+    public LicenseEntity(LicenseDTORequest dto) {
+        this.coreCount = dto.coreCount();
+        this.socketCount = dto.socketCount();
+        this.boardSerial = dto.boardSerial();
+        this.macAddress = dto.macAddress();
+        this.expireDate = dto.expireDate();
+        this.type = dto.type();
     }
 
 
@@ -46,6 +49,7 @@ public class LicenseEntity {
     @CreationTimestamp
     private Timestamp createDate;
 
+
     public LicenseDTO toDTO() {
             return LicenseDTO.builder()
                     .coreCount(this.coreCount)
@@ -55,6 +59,17 @@ public class LicenseEntity {
                     .expireDate(this.expireDate)
                     .type(this.type)
                     .build();
+    }
+
+    public LicenseProtos.License toProto() {
+        return LicenseProtos.License.newBuilder()
+                .setCoreCount(this.coreCount != null ? this.coreCount : 0)
+                .setSocketCount(this.socketCount != null ? this.socketCount : 0)
+                .setBoardSerial(this.boardSerial != null ? this.boardSerial : "")
+                .setMacAddress(this.macAddress != null ? this.macAddress : "")
+                .setExpireDate(this.expireDate != null ? this.expireDate : "")
+                .setType(this.type != null ? this.type : 0)
+                .build();
     }
 }
 

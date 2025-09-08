@@ -31,27 +31,27 @@ public class LicenseData {
     public void initialize() {
 
         sHandlers = Stream.of(
-                        // 새로운 필드 핸들러를 여기에 추가!
-                        new SocketCountSerializationHandler(), // 2
-                        new BoardSerialSerializationHandler(stringDataReader), // 4
-                        new MacAddressSerializationHandler(stringDataReader), // 8
-                        new ExpireDateSerializationHandler(), // 16
-                        new CoreCountSerializationHandler() // 1
-                )
-                .sorted(Comparator.comparingInt(LicenseFieldSerializationHandler::getBitmask))  //getBitmask() 기준으로 정렬
+            // 새로운 필드 핸들러를 여기에 추가!
+            new SocketCountSerializationHandler(), // 2
+            new BoardSerialSerializationHandler(stringDataReader), // 4
+            new MacAddressSerializationHandler(stringDataReader), // 8
+            new ExpireDateSerializationHandler(), // 16
+            new CoreCountSerializationHandler() // 1
+        )
+                .sorted(Comparator.comparingInt(LicenseFieldSerializationHandler::getBitmask))
                 .collect(Collectors.toList()); // 정렬!
         // 비트마스크가 불연속할때 빈 곳을 더미로 체워주는 코드
         this.sHandlers = createPaddedList(sHandlers, DummySerializationHandler::new);
 
         dHandlers = Stream.of(
-                        // 새로운 필드 핸들러를 여기에 추가!
-                        new CoreCountDeserializationHandler(), // 1
-                        new SocketCountDeserializationHandler(), // 2
-                        new BoardSerialDeserializationHandler(stringDataReader), // 3
-                        new MacAddressDeserializationHandler(stringDataReader), // 4
-                        new ExpireDateDeserializationHandler() // 5
-                )
-                .sorted(Comparator.comparingInt(LicenseFieldDeserializationHandler::getBitmask)) // getBitmask() 기준으로 정렬
+            // 새로운 필드 핸들러를 여기에 추가!
+            new CoreCountDeserializationHandler(), // 1
+            new SocketCountDeserializationHandler(), // 2
+            new BoardSerialDeserializationHandler(stringDataReader), // 3
+            new MacAddressDeserializationHandler(stringDataReader), // 4
+            new ExpireDateDeserializationHandler() // 5
+        )
+                .sorted(Comparator.comparingInt(LicenseFieldDeserializationHandler::getBitmask))
                 .collect(Collectors.toList()); // 정렬!
         // 비트마스크가 불연속할때 빈 곳을 더미로 체워주는 코드
         this.dHandlers = createPaddedList(dHandlers, DummyDeserializationHandler::new);
