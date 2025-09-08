@@ -133,15 +133,17 @@ license.public-key = 공유키
 
 
 
+
 프로토콜 버퍼는 데이터의 직렬화를 위한 라이브러리로 별도의 컴파일러를 가지고 있습니다.
 
 **프로토콜 버퍼**를 사용하는것으로 다음과 같은 이점을 얻습니다.
 
-**데이터 표준화**: .proto 파일을 통해 라이선스 데이터 구조를 명확하게 정의하여, 데이터 형식의 일관성을 보장합니다.
+* **데이터 표준화**: .proto 파일을 통해 라이선스 데이터 구조를 명확하게 정의하여, 데이터 형식의 일관성을 보장합니다.
 
-**효율성**: JSON이나 직접 구현한 직렬화 방식보다 더 작은 크기의 바이트 배열을 생성하여 라이선스 키의 전체 길이를 줄입니다.
+* **효율성**: JSON이나 직접 구현한 직렬화 방식보다 더 작은 크기의 바이트 배열을 생성하여 라이선스 키의 전체 길이를 줄입니다.
 
-**안전성**: 타입-세이프(Type-safe)한 빌더(Builder)를 제공하여 데이터 생성 시 오류를 줄입니다.
+* **안전성**: 타입-세이프(Type-safe)한 빌더(Builder)를 제공하여 데이터 생성 시 오류를 줄입니다.
+
 
 
 
@@ -173,40 +175,44 @@ Gradle 빌드 시 이 `.proto` 파일을 기반으로 `build/generated` 경로�
 
 
 
+
 ### 2. 프로젝트 내 통합 및 사용 흐름
 
 Protobuf는 라이선스 키 생성 및 검증 과정의 중심에서 데이터를 변환하는 역할을 담당합니다.
 
 
 
+
 **직렬화 (라이선스 키 생성 시)**
 
-`LicenseController`에서 ID를 통해 `LicenseEntity`를 조회합니다.
+* `LicenseController`에서 ID를 통해 `LicenseEntity`를 조회합니다.
 
-**LicenseEntity**의 `toProto()` 메소드를 호출하여 `Protobuf` 객체인 `LicenseProtos.License`로 변환합니다.
+* **LicenseEntity**의 `toProto()` 메소드를 호출하여 `Protobuf` 객체인 `LicenseProtos.License`로 변환합니다.
 
-이 과정에서 데이터베이스의 NULL 값이 Protobuf의 null 허용 정책 위반으로 **NullPointerException**을 발생시키지 않도록, null인 필드는 타입별 기본값(숫자는 0, 문자열은 "")으로 변환합니다.
+* 이 과정에서 데이터베이스의 NULL 값이 Protobuf의 null 허용 정책 위반으로 **NullPointerException**을 발생시키지 않도록, null인 필드는 타입별 기본값(숫자는 0, 문자열은 "")으로 변환합니다.
 
-`FormattedLicenseService`는 변환된 License 객체를 받아 `toByteArray()` 메소드를 호출하여 최종 바이트 배열을 생성합니다.
+* `FormattedLicenseService`는 변환된 License 객체를 받아 `toByteArray()` 메소드를 호출하여 최종 바이트 배열을 생성합니다.
 
-이 바이트 배열이 바로 서명 또는 암호화의 대상이 되는 **원본 데이터(Raw Data)**가 됩니다.
+* 이 바이트 배열이 바로 서명 또는 암호화의 대상이 되는 **원본 데이터(Raw Data)**가 됩니다.
+
 
 
 
 **역직렬화 (라이선스 키 검증 시)**
 
-**FormattedLicenseService**에서 Base32 디코딩 및 서명 검증이 완료된 원본 데이터(바이트 배열)를 얻습니다.
+* **FormattedLicenseService**에서 Base32 디코딩 및 서명 검증이 완료된 원본 데이터(바이트 배열)를 얻습니다.
 
-`License.parseFrom(rawData)` 정적 메소드를 호출하여 바이트 배열로부터 `LicenseProtos.License` 객체를 복원합니다.
+* `License.parseFrom(rawData)` 정적 메소드를 호출하여 바이트 배열로부터 `LicenseProtos.License` 객체를 복원합니다.
 
-**LicenseController**는 복원된 **License** 객체를 `LicenseResponseDTO.fromProto()`를 통해 클라이언트에게 반환할 DTO로 변환하여 최종 응답을 생성합니다.
+* **LicenseController**는 복원된 **License** 객체를 `LicenseResponseDTO.fromProto()`를 통해 클라이언트에게 반환할 DTO로 변환하여 최종 응답을 생성합니다.
+
 
 
 
 **3. 사용시 주의점**
 
-태그 번호: 기존 필드의 태그 번호(= 1, = 2 등)는 절대로 변경하거나 재사용해서는 안 됩니다. 이는 이미 발급된 라이선스 키의 호환성을 유지하기 위해 필수적인 규칙입니다.
+* 태그 번호: 기존 필드의 태그 번호(= 1, = 2 등)는 절대로 변경하거나 재사용해서는 안 됩니다. 이는 이미 발급된 라이선스 키의 호환성을 유지하기 위해 필수적인 규칙입니다.
 
-필드 추가: 새로운 필드를 추가하는 것은 안전합니다. 구 버전의 코드는 모르는 필드를 무시하므로 기존 라이선스 검증에 영향을 주지 않습니다.
+* 필드 추가: 새로운 필드를 추가하는 것은 안전합니다. 구 버전의 코드는 모르는 필드를 무시하므로 기존 라이선스 검증에 영향을 주지 않습니다.
 
-필드 삭제: 필드를 삭제할 경우, 해당 태그 번호를 reserved 키워드로 예약하여 미래에 재사용되는 것을 방지해야 합니다
+* 필드 삭제: 필드를 삭제할 경우, 해당 태그 번호를 reserved 키워드로 예약하여 미래에 재사용되는 것을 방지해야 합니다
