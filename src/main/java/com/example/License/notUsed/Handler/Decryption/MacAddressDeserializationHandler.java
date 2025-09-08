@@ -1,15 +1,15 @@
-package com.example.License.Handler.Decryption;
+package com.example.License.notUsed.Handler.Decryption;
 
-import com.example.License.DTO.LicenseDTO;
-import com.example.License.Handler.StringDataReader;
+import com.example.License.notUsed.LicenseDTO;
+import com.example.License.notUsed.Handler.StringDataReader;
 import lombok.RequiredArgsConstructor;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 
 @RequiredArgsConstructor
-public class BoardSerialDeserializationHandler implements LicenseFieldDeserializationHandler {
-    private final int BITMASK = 4;
+public class MacAddressDeserializationHandler implements LicenseFieldDeserializationHandler {
+    private final int BITMASK = 8;
     private final StringDataReader reader;
     public int getBitmask(){
         return BITMASK;
@@ -18,7 +18,7 @@ public class BoardSerialDeserializationHandler implements LicenseFieldDeserializ
     public void deserialize(DataInputStream dis, LicenseDTO.Builder builder) throws IOException {
         if ((builder.build().getType() & BITMASK) != 0) {
             if (dis.readBoolean()) {
-                builder.boardSerial(reader.readString(dis));
+                builder.macAddress(reader.readString(dis));
             }
         }
     }

@@ -1,4 +1,4 @@
-package com.example.License.DTO;
+package com.example.License.notUsed;
 
 public class LicenseDTO {
 

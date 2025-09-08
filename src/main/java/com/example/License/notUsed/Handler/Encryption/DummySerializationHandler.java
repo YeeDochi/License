@@ -1,6 +1,6 @@
-package com.example.License.Handler.Encryption;
+package com.example.License.notUsed.Handler.Encryption;
 
-import com.example.License.DTO.LicenseDTO;
+import com.example.License.notUsed.LicenseDTO;
 import lombok.RequiredArgsConstructor;
 
 import java.io.DataOutputStream;

@@ -2,11 +2,11 @@ package com.example.License.Entity;
 
 import java.sql.Timestamp;
 
-import com.example.License.DTO.LicenseDTORequest;
+import com.example.License.DTO.LicenseRequestDTO;
 import com.example.License.Proto.LicenseProtos;
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.example.License.DTO.LicenseDTO;
+import com.example.License.notUsed.LicenseDTO;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,15 +25,13 @@ import lombok.NoArgsConstructor;
 public class LicenseEntity {
 
 
-    public LicenseEntity(LicenseDTORequest dto) {
+    public LicenseEntity(LicenseRequestDTO dto) {
         this.coreCount = dto.coreCount();
         this.socketCount = dto.socketCount();
         this.boardSerial = dto.boardSerial();
         this.macAddress = dto.macAddress();
         this.expireDate = dto.expireDate();
-        this.type = dto.type();
     }
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,22 +42,9 @@ public class LicenseEntity {
     private String boardSerial;
     private String macAddress;
     private String expireDate;
-    private Integer type;
 
     @CreationTimestamp
     private Timestamp createDate;
-
-
-    public LicenseDTO toDTO() {
-            return LicenseDTO.builder()
-                    .coreCount(this.coreCount)
-                    .socketCount(this.socketCount)
-                    .boardSerial(this.boardSerial)
-                    .macAddress(this.macAddress)
-                    .expireDate(this.expireDate)
-                    .type(this.type)
-                    .build();
-    }
 
     public LicenseProtos.License toProto() {
         return LicenseProtos.License.newBuilder()
@@ -68,7 +53,6 @@ public class LicenseEntity {
                 .setBoardSerial(this.boardSerial != null ? this.boardSerial : "")
                 .setMacAddress(this.macAddress != null ? this.macAddress : "")
                 .setExpireDate(this.expireDate != null ? this.expireDate : "")
-                .setType(this.type != null ? this.type : 0)
                 .build();
     }
 }

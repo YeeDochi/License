@@ -1,6 +1,6 @@
-package com.example.License.Handler.Decryption;
+package com.example.License.notUsed.Handler.Decryption;
 
-import com.example.License.DTO.LicenseDTO.Builder;
+import com.example.License.notUsed.LicenseDTO.Builder;
 import lombok.RequiredArgsConstructor;
 
 import java.io.DataInputStream;

@@ -1,4 +1,4 @@
-package com.example.License.DTO;
+package com.example.License.notUsed;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.example.License.Handler.Decryption.*;
-import com.example.License.Handler.Encryption.*;
-import com.example.License.Handler.StringDataReader;
+import com.example.License.notUsed.Handler.Decryption.*;
+import com.example.License.notUsed.Handler.Encryption.*;
+import com.example.License.notUsed.Handler.StringDataReader;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

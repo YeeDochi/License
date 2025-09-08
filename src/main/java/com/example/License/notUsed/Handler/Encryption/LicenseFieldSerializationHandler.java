@@ -1,9 +1,9 @@
-package com.example.License.Handler.Encryption;
+package com.example.License.notUsed.Handler.Encryption;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import com.example.License.DTO.LicenseDTO;
+import com.example.License.notUsed.LicenseDTO;
 
 
 public interface LicenseFieldSerializationHandler {

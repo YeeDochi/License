@@ -14,11 +14,7 @@ import org.apache.commons.codec.binary.Base32;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-// --- 변경 후 ---
 import com.example.License.Proto.LicenseProtos.License; // 생성된 Protobuf 클래스를 import
-// --- 변경 전 ---
-// import com.example.License.DTO.LicenseDTO;
-// import com.example.License.DTO.LicenseData;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,15 +34,10 @@ public class newFormattedLicenseService {
     private int GCM_TAG_LENGTH;
 
     private final KeyLoader keyLoader;
-    // private final LicenseData data; // <-- 1. LicenseData 의존성 제거
-
-    // --- 변경 후: 파라미터를 Protobuf 객체로 변경 ---
     public String createLicenseKey(License license) throws Exception {
         System.out.println("CreateKey License val: " + license);
-        // --- 변경 후: Protobuf 객체에서 바로 byte 배열로 변환 ---
-        byte[] rawData = license.toByteArray();
+        byte[] rawData = license.toByteArray(); // 프로토콜 버퍼로 직렬화
 
-        // (이하 암호화 로직은 동일)
         byte[] iv = new byte[GCM_IV_LENGTH];
         new SecureRandom().nextBytes(iv);
         SecretKeySpec keySpec = new SecretKeySpec(SECRET_KEY.getBytes(StandardCharsets.UTF_8), "AES");
@@ -67,10 +58,8 @@ public class newFormattedLicenseService {
     // --- 변경 후: 파라미터를 Protobuf 객체로 변경 ---
     public String createLicenseKey(License license, int temp) throws Exception {
         System.out.println("CreateKey License val: " + license + ", temp: " + temp);
-        // --- 변경 후: Protobuf 객체에서 바로 byte 배열로 변환 ---
         byte[] rawData = license.toByteArray();
 
-        // (이하 서명 로직은 동일)
         int dataLength = rawData.length;
         PrivateKey privateKey = keyLoader.loadPrivateKey();
         Signature ecdsaSign = Signature.getInstance(ASYMMETRIC_SIGNATURE_ALGORITHM);
@@ -82,14 +71,13 @@ public class newFormattedLicenseService {
         byteBuffer.putShort((short) dataLength);
         byteBuffer.put(rawData);
         byteBuffer.put(signature);
-        byte[] finalBytes = byteBuffer.array();
+        byte[] finalBytes = byteBuffer.array(); // 데이터의 길이, 데이터, 서명 합치기
 
         String base32Encoded = new Base32().encodeToString(finalBytes);
         String replacedPadding = base32Encoded.replace('=', '0');
         return formatBase32ToKey(replacedPadding, DEFAULT_CHUNK_SIZE);
     }
 
-    // --- 변경 후: 반환 타입을 Protobuf 객체로 변경 ---
     public License decodeLicenseKey(String formattedKey) throws Exception {
         String base32Encoded = formattedKey.replace("-", "").toUpperCase().replaceAll("=", "");
         String restoredBase32 = base32Encoded.replace('0', '=');
@@ -106,11 +94,9 @@ public class newFormattedLicenseService {
         cipher.init(Cipher.DECRYPT_MODE, keySpec, gcmSpec);
         byte[] decryptedData = cipher.doFinal(encryptedData);
 
-        // --- 변경 후: byte 배열에서 Protobuf 객체로 파싱 ---
         return License.parseFrom(decryptedData);
     }
 
-    // --- 변경 후: 반환 타입을 Protobuf 객체로 변경 ---
     public License decodeLicenseKey(String formattedKey, int temp) throws Exception {
         String base32Encoded = formattedKey.replace("-", "").toUpperCase().replaceAll("=", "");
         String restoredBase32 = base32Encoded.replace('0', '=');
@@ -131,7 +117,6 @@ public class newFormattedLicenseService {
 
         if (isValid) {
             System.out.println("유효한 라이선스입니다.");
-            // --- 변경 후: byte 배열에서 Protobuf 객체로 파싱 ---
             return License.parseFrom(rawData);
         } else {
             System.out.println("위조된 라이선스입니다!");

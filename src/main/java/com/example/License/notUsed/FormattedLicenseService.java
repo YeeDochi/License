@@ -1,4 +1,4 @@
-package com.example.License.Service;
+package com.example.License.notUsed;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -10,12 +10,11 @@ import java.security.Signature;
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import com.example.License.Service.KeyLoader;
 import org.apache.commons.codec.binary.Base32;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import com.example.License.DTO.LicenseDTO;
-import com.example.License.DTO.LicenseData;
 
 import lombok.RequiredArgsConstructor;
 
