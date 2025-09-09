@@ -127,217 +127,92 @@ license.public-key = 공유키
 ## 🖥️ 데모 영상
 [https://github.com/YeeDochi/License/issues/1#issue-3383845106](https://github.com/user-attachments/assets/8af0e98e-f430-4a37-9aa9-7d620d34da00)
 
+## Protocal Buffer
 
-# 라이선스 필드 핸들러 작성 가이드
+본 프로젝트에서 적용된 프로토콜 버퍼의 사용법에 대해 간략히 기술하겠습니다.
 
-이 문서는 라이선스 필드의 직렬화(Serialization) 및 역직렬화(Deserialization)를 처리하는 핸들러의 작성 방법을 설명합니다. 각 핸들러는 특정 데이터 필드를 `DataOutputStream`에 쓰거나 `DataInputStream`에서 읽어 `LicenseDTO` 객체를 채우는 역할을 합니다.
 
----
 
-## 인터페이스
 
-모든 핸들러는 다음 두 인터페이스 중 하나를 구현해야 합니다.
+프로토콜 버퍼는 데이터의 직렬화를 위한 라이브러리로 별도의 컴파일러를 가지고 있습니다.
 
--   `LicenseFieldSerializationHandler`: DTO 객체의 데이터를 스트림에 쓰는(직렬화) 메서드 `serialize`를 정의합니다.
--   `LicenseFieldDeserializationHandler`: 스트림에서 데이터를 읽어 DTO 빌더 객체에 설정하는(역직렬화) 메서드 `deserialize`를 정의합니다.
+**프로토콜 버퍼**를 사용하는것으로 다음과 같은 이점을 얻습니다.
 
----
+* **데이터 표준화**: .proto 파일을 통해 라이선스 데이터 구조를 명확하게 정의하여, 데이터 형식의 일관성을 보장합니다.
 
-## 1. Deserialization (D) 핸들러 작성 방법
+* **효율성**: JSON이나 직접 구현한 직렬화 방식보다 더 작은 크기의 바이트 배열을 생성하여 라이선스 키의 전체 길이를 줄입니다.
 
-역직렬화 핸들러는 `DataInputStream`으로부터 데이터를 읽어 `LicenseDTO.Builder`에 값을 설정합니다.
+* **안전성**: 타입-세이프(Type-safe)한 빌더(Builder)를 제공하여 데이터 생성 시 오류를 줄입니다.
 
-### 기본 구조
 
-```java
-// LicenseFieldDeserializationHandler 인터페이스 구현
-public class FieldNameDeserializationHandler implements LicenseFieldDeserializationHandler {
-    // 각 필드를 식별하는 고유 비트마스크
-    private static final int BITMASK = {고유 값};
 
-    @Override
-    public void deserialize(DataInputStream dis, LicenseDTO.Builder builder) throws IOException {
-       // 1. 비트마스크 검사: 현재 라이선스 타입에 해당 필드가 포함되는지 확인
-       if ((builder.build().getType() & BITMASK) != 0) {
-            // 2. Null 여부 확인: 데이터가 실제로 존재하는지 boolean 값으로 확인
-            if (dis.readBoolean()) {
-                // 3. 실제 데이터 읽기 및 DTO 빌더에 설정
-                builder.fieldName({데이터 읽기});
-            }
-        }
-    }
+
+### 1. 스키마 (license.proto)
+
+라이선스 데이터의 구조는 아래 경로의 파일에 정의되어 있습니다.
+
+`파일 위치: src/main/proto/license.proto`
+
+```Protocol Buffers
+
+syntax = "proto3";
+
+package com.example.License.Proto;
+
+option java_package = "com.example.License.Proto";
+option java_outer_classname = "LicenseProtos";
+
+message License {
+  int32 core_count = 2;
+  int32 socket_count = 3;
+  string board_serial = 4;
+  string mac_address = 5;
+  string expire_date = 6;
 }
 ```
 
-### 데이터 타입별 작성법
+Gradle 빌드 시 이 `.proto` 파일을 기반으로 `build/generated` 경로에 `LicenseProtos.java` 클래스가 자동으로 생성됩니다.
 
-#### `int` 타입 (예: `CoreCountDeserializationHandler`)
 
-`int` 타입의 필드는 `DataInputStream`의 `readInt()` 메서드를 사용하여 직접 읽습니다.
 
-```java
-// CoreCountDeserializationHandler.java
 
-@RequiredArgsConstructor
-public class CoreCountDeserializationHandler implements LicenseFieldDeserializationHandler {
-    private static final int BITMASK = 1;
+### 2. 프로젝트 내 통합 및 사용 흐름
 
-    @Override
-    public void deserialize(DataInputStream dis, Builder builder) throws IOException {
-       if ((builder.build().getType() & BITMASK) != 0) {
-            // 스트림의 첫 boolean 값이 true이면 데이터가 존재함을 의미
-            if (dis.readBoolean()) {
-                // readInt()를 사용해 정수 값을 읽어 빌더에 설정
-                builder.coreCount(dis.readInt());
-            }
-        }
-    }
-}
-```
+Protobuf는 라이선스 키 생성 및 검증 과정의 중심에서 데이터를 변환하는 역할을 담당합니다.
 
-#### `String` 타입 (예: `BoardSerialDeserializationHandler`)
 
-`String` 타입은 가변 길이 데이터이므로, 별도의 `StringDataReader` 헬퍼 클래스를 사용하여 읽습니다. `StringDataReader`는 먼저 문자열의 길이를 읽고, 그 길이만큼 바이트를 읽어 문자열로 변환합니다.
 
-```java
-// BoardSerialDeserializationHandler.java
 
-@RequiredArgsConstructor
-public class BoardSerialDeserializationHandler implements LicenseFieldDeserializationHandler {
-    private static final int BITMASK = 4;
-    private final StringDataReader reader; // StringDataReader 주입
+**직렬화 (라이선스 키 생성 시)**
 
-    @Override
-    public void deserialize(DataInputStream dis, LicenseDTO.Builder builder) throws IOException {
-        if ((builder.build().getType() & BITMASK) != 0) {
-            if (dis.readBoolean()) {
-                // reader.readString(dis)를 사용해 문자열을 읽어 빌더에 설정
-                builder.boardSerial(reader.readString(dis));
-            }
-        }
-    }
-}
-```
+* `LicenseController`에서 ID를 통해 `LicenseEntity`를 조회합니다.
 
--   **`StringDataReader.readString(dis)` 동작 방식:**
-    1.  `dis.readShort()`: 문자열의 길이를 나타내는 2바이트 short 값을 먼저 읽습니다.
-    2.  `new byte[length]`: 읽은 길이만큼 바이트 배열을 생성합니다.
-    3.  `dis.readFully(bytes)`: 생성된 바이트 배열을 데이터로 채웁니다.
-    4.  `new String(bytes, StandardCharsets.UTF_8)`: 바이트 배열을 UTF-8 인코딩으로 문자열 객체로 변환하여 반환합니다.
+* **LicenseEntity**의 `toProto()` 메소드를 호출하여 `Protobuf` 객체인 `LicenseProtos.License`로 변환합니다.
 
----
+* 이 과정에서 데이터베이스의 NULL 값이 Protobuf의 null 허용 정책 위반으로 **NullPointerException**을 발생시키지 않도록, null인 필드는 타입별 기본값(숫자는 0, 문자열은 "")으로 변환합니다.
 
-## 2. Serialization (S) 핸들러 작성 방법
+* `FormattedLicenseService`는 변환된 License 객체를 받아 `toByteArray()` 메소드를 호출하여 최종 바이트 배열을 생성합니다.
 
-직렬화 핸들러는 `LicenseDTO`에서 값을 가져와 `DataOutputStream`에 씁니다.
+* 이 바이트 배열이 바로 서명 또는 암호화의 대상이 되는 **원본 데이터(Raw Data)**가 됩니다.
 
-### 기본 구조
 
-```java
-// LicenseFieldSerializationHandler 인터페이스 구현
-public class FieldNameSerializationHandler implements LicenseFieldSerializationHandler {
-    // 각 필드를 식별하는 고유 비트마스크
-    private static final int BITMASK = {고유 값};
 
-    @Override
-    public void serialize(DataOutputStream dos, LicenseDTO dto) throws IOException {
-        // 1. 비트마스크 검사: 라이선스 타입에 해당 필드가 포함되는지 확인
-        // 2. DTO 필드 값 Null 여부 확인
-        if ((dto.getType() & BITMASK) != 0 && dto.getFieldName() != null) {
-            // 3. 데이터 존재 여부 Flag 쓰기 (true)
-            dos.writeBoolean(true);
-            // 4. 실제 데이터 쓰기
-            // {데이터 쓰기}
-        } else if ((dto.getType() & BITMASK) != 0) {
-            // 5. 데이터가 Null인 경우 Flag 쓰기 (false)
-            dos.writeBoolean(false);
-        }
-    }
-}
-```
 
-### 데이터 타입별 작성법
+**역직렬화 (라이선스 키 검증 시)**
 
-#### `int` 타입 (예: `CoreCountSerializationHandler`)
+* **FormattedLicenseService**에서 Base32 디코딩 및 서명 검증이 완료된 원본 데이터(바이트 배열)를 얻습니다.
 
-`int` 타입 필드는 `DataOutputStream`의 `writeInt()` 메서드를 사용하여 직접 씁니다.
+* `License.parseFrom(rawData)` 정적 메소드를 호출하여 바이트 배열로부터 `LicenseProtos.License` 객체를 복원합니다.
 
-```java
-// CoreCountSerializationHandler.java
+* **LicenseController**는 복원된 **License** 객체를 `LicenseResponseDTO.fromProto()`를 통해 클라이언트에게 반환할 DTO로 변환하여 최종 응답을 생성합니다.
 
-@RequiredArgsConstructor
-public class CoreCountSerializationHandler implements LicenseFieldSerializationHandler {
-    private static final int BITMASK = 1;
 
-    @Override
-    public void serialize(DataOutputStream dos, LicenseDTO dto) throws IOException {
-        // 비트마스크에 포함되고, DTO의 coreCount 값이 null이 아닐 때
-        if ((dto.getType() & BITMASK) != 0 && dto.getCoreCount() != null) {
-            dos.writeBoolean(true); // 데이터가 있음을 표시
-            dos.writeInt(dto.getCoreCount()); // 실제 int 값을 씀
-        } else if ((dto.getType() & BITMASK) != 0) {
-            // 비트마스크에는 포함되지만 값이 null일 경우
-            dos.writeBoolean(false); // 데이터가 없음을 표시
-        }
-    }
-}
-```
 
-#### `String` 타입 (예: `BoardSerialSerializationHandler`)
 
-`String` 타입은 `StringDataReader`의 `writeString` 메서드를 사용하여 씁니다. 이 메서드는 문자열을 바이트로 변환하고, 길이를 먼저 쓴 뒤 실제 데이터 바이트를 씁니다.
+**3. 사용시 주의점**
 
-```java
-// BoardSerialSerializationHandler.java
+* 태그 번호: 기존 필드의 태그 번호(= 1, = 2 등)는 절대로 변경하거나 재사용해서는 안 됩니다. 이는 이미 발급된 라이선스 키의 호환성을 유지하기 위해 필수적인 규칙입니다.
 
-@RequiredArgsConstructor
-public class BoardSerialSerializationHandler implements LicenseFieldSerializationHandler {
-    private static final int BITMASK = 4;
-    private final StringDataReader reader; // StringDataReader 주입
+* 필드 추가: 새로운 필드를 추가하는 것은 안전합니다. 구 버전의 코드는 모르는 필드를 무시하므로 기존 라이선스 검증에 영향을 주지 않습니다.
 
-    @Override
-    public void serialize(DataOutputStream dos, LicenseDTO dto) throws IOException {
-        if ((dto.getType() & BITMASK) != 0 && dto.getBoardSerial() != null) {
-            dos.writeBoolean(true); // 데이터가 있음을 표시
-            reader.writeString(dos, dto.getBoardSerial()); // 실제 String 값을 씀
-        } else if ((dto.getType() & BITMASK) != 0) {
-            dos.writeBoolean(false); // 데이터가 없음을 표시
-        }
-    }
-}
-```
-
--   **`StringDataReader.writeString(dos, str)` 동작 방식:**
-    1.  `str.getBytes(StandardCharsets.UTF_8)`: 문자열을 UTF-8 바이트 배열로 변환합니다.
-    2.  `dos.writeShort(bytes.length)`: 변환된 바이트 배열의 길이를 2바이트 short 값으로 먼저 씁니다.
-    3.  `dos.write(bytes)`: 실제 바이트 배열 데이터를 씁니다.
-
----
-
-## 3. 작성이 끝난후
-
-작성이 완료되면 해당 헨들러들은 `LicanseData.java` 에 등록되어야 합니다
-
-```java
- @PostConstruct
-    public void initialize() {
-        sHandlers = List.of(
-                // 새로운 필드 핸들러를 여기에 추가!
-                new CoreCountSerializationHandler(),
-                new SocketCountSerializationHandler(),
-                new BoardSerialSerializationHandler(stringDataReader),
-                new MacAddressSerializationHandler(stringDataReader),
-                new ExpireDateSerializationHandler()
-        );
-
-        dHandlers = List.of(
-                // 새로운 필드 핸들러를 여기에 추가!
-                new CoreCountDeserializationHandler(),
-                new SocketCountDeserializationHandler(),
-                new BoardSerialDeserializationHandler(stringDataReader),
-                new MacAddressDeserializationHandler(stringDataReader),
-                new ExpireDateDeserializationHandler()
-        );
-    }
-```
-추가하는 헨들러는 쌍을 이루어야합니다.
+* 필드 삭제: 필드를 삭제할 경우, 해당 태그 번호를 reserved 키워드로 예약하여 미래에 재사용되는 것을 방지해야 합니다
