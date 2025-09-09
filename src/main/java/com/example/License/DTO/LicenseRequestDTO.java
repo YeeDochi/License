@@ -2,10 +2,10 @@ package com.example.License.DTO;
 
 
 public record LicenseRequestDTO(
-    Integer coreCount,
-    Integer socketCount,
-    String boardSerial,
-    String macAddress,
-    String expireDate,
-    Integer type
+    String license_v,
+    String expiration,
+    String uuid,
+    String customerid,
+    String solution,
+    String publicKey
 ) {}

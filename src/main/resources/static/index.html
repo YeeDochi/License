@@ -112,24 +112,26 @@
             flex-direction: column;
         }
         .col-span-2 { grid-column: span 2 / span 2; }
-        
-        .form-label-group {
+
+        .input-group {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
+        }
+        .input-group .form-input {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            flex-grow: 1;
+        }
+        .input-group .btn {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border-left: 0;
         }
 
         .form-label {
             font-weight: 500;
             color: var(--fg-muted);
             font-size: 0.875rem;
-        }
-
-        .form-checkbox {
-            accent-color: var(--accent-fg);
-            width: 1rem;
-            height: 1rem;
+            margin-bottom: 0.5rem;
         }
 
         .form-input {
@@ -148,12 +150,7 @@
             border-color: var(--accent-fg);
             box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
         }
-        .form-input:disabled {
-            background-color: #0d1117;
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-        
+
         input[type="date"] { color-scheme: dark; }
 
         .btn {
@@ -210,8 +207,8 @@
             position: relative;
         }
         .result-box.is-visible { display: block; }
-        .result-box pre { 
-            margin: 0; 
+        .result-box pre {
+            margin: 0;
             overflow-x: auto;
         }
         .result-box.success { color: var(--fg-default); }
@@ -245,171 +242,107 @@
 </head>
 <body>
 
-    <div class="container">
-        <header class="header">
-            <div class="header-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-fg);"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"></path><path d="M18 9h2a2 2 0 0 1 2 2v10l-4-4h-6a2 2 0 0 1-2-2v-1"></path></svg>
+<div class="container">
+    <header class="header">
+        <div class="header-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-fg);"><path d="m15 5-6 6"></path><path d="m11 5 6 6"></path><path d="M3 11v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-6"></path></svg>
+        </div>
+        <h1>License Key System</h1>
+        <p>Generate, issue, and validate license keys via API.</p>
+    </header>
+
+    <main>
+        <!-- Step 1: Issue License Key -->
+        <section id="step1" class="card">
+            <div class="card-header">
+                <div class="step-circle">1</div>
+                <h2 class="card-title">Issue License Key</h2>
             </div>
-            <h1>License Key System</h1>
-            <p>Generate, issue, and validate license keys via API.</p>
-        </header>
-
-        <main>
-            <!-- Step 1: Create License -->
-            <section id="step1" class="card">
-                <div class="card-header">
-                    <div class="step-circle">1</div>
-                    <h2 class="card-title">Create License</h2>
+            <form id="issueLicenseForm" class="form-grid">
+                <div class="form-group">
+                    <label for="lkv" class="form-label">License Key Version (lkv)</label>
+                    <input type="text" name="license_v" class="form-input" value="1.0" required>
                 </div>
-                <form id="createLicenseForm" class="form-grid">
-                    <div class="form-group">
-                        <div class="form-label-group">
-                            <label for="coreCount" class="form-label">Core Count</label>
-                            <input type="checkbox" class="form-checkbox bitmask-checkbox" data-bitmask="1" data-target="coreCount" checked>
-                        </div>
-                        <input type="number" name="coreCount" class="form-input" placeholder="e.g., 8">
-                    </div>
-                    <div class="form-group">
-                        <div class="form-label-group">
-                            <label for="socketCount" class="form-label">Socket Count</label>
-                            <input type="checkbox" class="form-checkbox bitmask-checkbox" data-bitmask="2" data-target="socketCount" checked>
-                        </div>
-                        <input type="number" name="socketCount" class="form-input" placeholder="e.g., 2">
-                    </div>
-                    <div class="form-group col-span-2">
-                         <div class="form-label-group">
-                            <label for="boardSerial" class="form-label">Board Serial</label>
-                            <input type="checkbox" class="form-checkbox bitmask-checkbox" data-bitmask="4" data-target="boardSerial" checked>
-                        </div>
-                        <input type="text" name="boardSerial" class="form-input" placeholder="e.g., BSN-12345678">
-                    </div>
-                    <div class="form-group col-span-2">
-                        <div class="form-label-group">
-                            <label for="macAddress" class="form-label">MAC Address</label>
-                             <input type="checkbox" class="form-checkbox bitmask-checkbox" data-bitmask="8" data-target="macAddress" checked>
-                        </div>
-                        <input type="text" name="macAddress" class="form-input" placeholder="e.g., 00:1B:44:11:3A:B7">
-                    </div>
-                    <div class="form-group">
-                        <div class="form-label-group">
-                            <label for="expireDate" class="form-label">Expiration Date</label>
-                            <input type="checkbox" class="form-checkbox bitmask-checkbox" data-bitmask="16" data-target="expireDate" checked>
-                        </div>
-                        <input type="date" name="expireDate" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <div class="form-label-group">
-                            <label for="type" class="form-label">Type (Bitmask)</label>
-                        </div>
-                        <input type="number" name="type" class="form-input" readonly>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" id="createBtn" class="btn btn-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 8v8"></path><path d="M8 12h8"></path></svg>
-                            Generate
-                        </button>
-                    </div>
-                </form>
-                <div id="createResult" class="result-box"></div>
-            </section>
-
-            <!-- Step 2: Issue License Key -->
-            <section id="step2" class="card">
-                <div class="card-header">
-                    <div class="step-circle">2</div>
-                    <h2 class="card-title">Issue License Key</h2>
+                <div class="form-group">
+                    <label for="exp" class="form-label">Expiration Date (exp)</label>
+                    <input type="date" name="expiration" class="form-input" required>
                 </div>
-                <form id="issueKeyForm" class="form-grid">
-                    <div class="form-group col-span-2">
-                        <label for="licenseId" class="form-label">License ID</label>
-                        <input type="text" id="licenseId" class="form-input" placeholder="Enter License ID or generate from Step 1">
+                <div class="form-group col-span-2">
+                    <label for="uuid" class="form-label">License ID (uuid)</label>
+                    <div class="input-group">
+                        <input type="text" name="uuid" class="form-input" placeholder="Click button to generate" required>
+                        <button type="button" id="generateUuidBtn" class="btn btn-secondary">Generate</button>
                     </div>
-                     <div class="form-actions">
-                        <button type="button" id="copyKeyBtn" class="btn btn-secondary hidden">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                            Copy
-                        </button>
-                        <button type="submit" id="getKeyBtn" class="btn btn-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-6 6"></path><path d="m11 5 6 6"></path><path d="M3 11v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-6"></path></svg>
-                            Issue Key
-                        </button>
-                    </div>
-                </form>
-                <div id="issueResult" class="result-box"></div>
-            </section>
-
-            <!-- Step 3: Validate License Key -->
-            <section id="step3" class="card">
-                <div class="card-header">
-                    <div class="step-circle">3</div>
-                    <h2 class="card-title">Validate License Key</h2>
                 </div>
-                 <form id="validateKeyForm" class="form-grid">
-                    <div class="form-group col-span-2">
-                        <label for="licenseKey" class="form-label">License Key</label>
-                        <textarea id="licenseKey" rows="5" class="form-input" placeholder="Issued from Step 2"></textarea>
-                    </div>
-                     <div class="form-actions">
-                        <button type="submit" id="decodeBtn" class="btn btn-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.2 12.3c.5.3 1.2-.2 1.2-.8v-2c0-.4-.3-.8-.8-.8s-.8.3-.8.8v1.2l-4.2-2.5c-.3-.2-.5-.2-.8 0l-4 2.4-4-2.4c-.3-.2-.5-.2-.8 0l-4.2 2.5v-1.2c0-.4-.3-.8-.8-.8s-.8.3-.8.8v2c0 .6.7 1.1 1.2.8l4.2-2.5c.3-.2.5-.2-.8 0l4 2.4 4-2.4c.3-.2.5-.2-.8 0Z"></path><path d="M21.2 16.3c.5.3 1.2-.2 1.2-.8v-2c0-.4-.3-.8-.8-.8s-.8.3-.8.8v1.2l-4.2-2.5c-.3-.2-.5-.2-.8 0l-4 2.4-4-2.4c-.3-.2-.5-.2-.8 0l-4.2 2.5v-1.2c0-.4-.3-.8-.8-.8s-.8.3-.8.8v2c0 .6.7 1.1 1.2.8l4.2-2.5c.3-.2.5-.2-.8 0l4 2.4 4-2.4c.3-.2.5-.2-.8 0Z"></path></svg>
-                            Validate Key
-                        </button>
-                    </div>
-                </form>
-                <div id="validateResult" class="result-box"></div>
-            </section>
-        </main>
-    </div>
-    
-    <div id="toast" class="toast"></div>
+                <div class="form-group">
+                    <label for="cid" class="form-label">Customer ID (cid)</label>
+                    <input type="text" name="customerid" class="form-input" placeholder="e.g., customer_001" required>
+                </div>
+                <div class="form-group">
+                    <label for="sol" class="form-label">Solution Type (sol)</label>
+                    <input type="text" name="solution" class="form-input" placeholder="e.g., OPIT" required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="copyKeyBtn" class="btn btn-secondary hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy Key
+                    </button>
+                    <button type="submit" id="issueBtn" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 8v8"></path><path d="M8 12h8"></path></svg>
+                        Issue Key
+                    </button>
+                </div>
+            </form>
+            <div id="issueResult" class="result-box"></div>
+        </section>
+
+        <!-- Step 2: Validate License Key -->
+        <section id="step2" class="card">
+            <div class="card-header">
+                <div class="step-circle">2</div>
+                <h2 class="card-title">Validate License Key</h2>
+            </div>
+            <form id="validateKeyForm" class="form-grid">
+                <div class="form-group col-span-2">
+                    <label for="licenseKey" class="form-label">License Key to Validate</label>
+                    <textarea id="licenseKey" rows="5" class="form-input" placeholder="Issued from Step 1"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" id="decodeBtn" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.2 12.3c.5.3 1.2-.2 1.2-.8v-2c0-.4-.3-.8-.8-.8s-.8.3-.8.8v1.2l-4.2-2.5c-.3-.2-.5-.2-.8 0l-4 2.4-4-2.4c-.3-.2-.5-.2-.8 0l-4.2 2.5v-1.2c0-.4-.3-.8-.8-.8s-.8.3-.8.8v2c0 .6.7 1.1 1.2.8l4.2-2.5c.3-.2.5-.2-.8 0l4 2.4 4-2.4c.3-.2.5-.2-.8 0Z"></path><path d="M21.2 16.3c.5.3 1.2-.2 1.2-.8v-2c0-.4-.3-.8-.8-.8s-.8.3-.8.8v1.2l-4.2-2.5c-.3-.2-.5-.2-.8 0l-4 2.4-4-2.4c-.3-.2-.5-.2-.8 0l-4.2 2.5v-1.2c0-.4-.3-.8-.8-.8s-.8.3-.8.8v2c0 .6.7 1.1 1.2.8l4.2-2.5c.3-.2.5-.2-.8 0l4 2.4 4-2.4c.3-.2.5-.2-.8 0Z"></path></svg>
+                        Validate Key
+                    </button>
+                </div>
+            </form>
+            <div id="validateResult" class="result-box"></div>
+        </section>
+    </main>
+</div>
+
+<div id="toast" class="toast"></div>
 
 <script>
+    // Assuming your Spring Boot backend runs on localhost:8080
     const API_BASE_URL = 'http://localhost:8081' ;
 
-    const createForm = document.getElementById('createLicenseForm');
-    const issueForm = document.getElementById('issueKeyForm');
+    const issueForm = document.getElementById('issueLicenseForm');
     const validateForm = document.getElementById('validateKeyForm');
     const allButtons = document.querySelectorAll('.btn');
 
-    const createResultEl = document.getElementById('createResult');
     const issueResultEl = document.getElementById('issueResult');
     const validateResultEl = document.getElementById('validateResult');
 
-    const licenseIdInput = document.getElementById('licenseId');
     const licenseKeyTextarea = document.getElementById('licenseKey');
-    
     const copyKeyBtn = document.getElementById('copyKeyBtn');
-    
-    // --- Bitmask Logic ---
-    const typeInput = document.querySelector('input[name="type"]');
-    const bitmaskCheckboxes = document.querySelectorAll('.bitmask-checkbox');
+    const generateUuidBtn = document.getElementById('generateUuidBtn');
 
-    function updateBitmaskAndInputs() {
-        let currentType = 0;
-        bitmaskCheckboxes.forEach(checkbox => {
-            const bitmaskValue = parseInt(checkbox.dataset.bitmask, 10);
-            const targetInput = document.querySelector(`input[name=${checkbox.dataset.target}]`);
-
-            if (checkbox.checked) {
-                currentType |= bitmaskValue;
-            } else {
-                if (targetInput) {
-                    targetInput.value = '';
-                }
-            }
-        });
-        typeInput.value = currentType;
-    }
-
-    bitmaskCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateBitmaskAndInputs);
-    });
-    // --- End Bitmask Logic ---
-
-    createForm.addEventListener('submit', handleCreateLicense);
-    issueForm.addEventListener('submit', handleIssueKey);
+    // --- Event Listeners ---
+    issueForm.addEventListener('submit', handleIssueLicense);
     validateForm.addEventListener('submit', handleValidateKey);
-    
+    generateUuidBtn.addEventListener('click', () => {
+        document.querySelector('input[name="uuid"]').value = crypto.randomUUID();
+    });
     copyKeyBtn.addEventListener('click', () => {
         const keyToCopy = issueResultEl.querySelector('pre')?.textContent;
         if (keyToCopy) {
@@ -419,74 +352,44 @@
         }
     });
 
-    async function handleCreateLicense(e) {
+    async function handleIssueLicense(e) {
         e.preventDefault();
         setLoading(true);
-        hideResult(createResultEl);
-        
-        const formData = new FormData(createForm);
+        hideResult(issueResultEl);
+        copyKeyBtn.classList.add('hidden');
+
+        const formData = new FormData(issueForm);
+        // publicKey is intentionally omitted as requested. The backend will generate it.
         const payload = {
-            coreCount: formData.get('coreCount') ? parseInt(formData.get('coreCount'), 10) : null,
-            socketCount: formData.get('socketCount') ? parseInt(formData.get('socketCount'), 10) : null,
-            boardSerial: formData.get('boardSerial') || null,
-            macAddress: formData.get('macAddress') || null,
-            expireDate: formData.get('expireDate') || null,
-            type: parseInt(typeInput.value, 10), // Use the calculated value
+            license_v: formData.get('license_v'),
+            expiration: formData.get('expiration'),
+            uuid: formData.get('uuid'),
+            customerid: formData.get('customerid'),
+            solution: formData.get('solution')
         };
 
         try {
-            const response = await fetch(`${API_BASE_URL}/license`, {
+            // UPDATED: Changed endpoint to match controller
+            const response = await fetch(`${API_BASE_URL}/license/issue`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
+
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(`[${response.status}] ${errorText}`);
             }
-            const newId = await response.json();
-            showResult(createResultEl, `✅ 라이선스 생성 성공!\nID: ${newId}`, 'success');
-            licenseIdInput.value = newId;
-            showToast('라이선스 생성 성공!', 'success');
-            document.getElementById('step2').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } catch (error) {
-            showResult(createResultEl, `❌ 생성 실패: ${error.message}`, 'error');
-            showToast('라이선스 생성 실패', 'error');
-        } finally {
-            setLoading(false);
-        }
-    }
 
-    async function handleIssueKey(e) {
-        e.preventDefault();
-        const id = licenseIdInput.value;
-        if (!id) {
-            showToast('라이선스 ID가 없습니다.', 'error');
-            return;
-        }
-
-        setLoading(true);
-        hideResult(issueResultEl);
-        copyKeyBtn.classList.add('hidden'); 
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/license/${id}`);
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`[${response.status}] ${errorText}`);
-            }
+            // Assuming the response is the raw license key string
             const licenseKey = await response.text();
-            
-            const content = `<pre>${licenseKey}</pre>`;
-            
-            issueResultEl.innerHTML = content;
-            issueResultEl.className = 'result-box is-visible success';
-            licenseKeyTextarea.value = licenseKey;
 
-            copyKeyBtn.classList.remove('hidden'); 
+            showResult(issueResultEl, licenseKey, 'success');
+            licenseKeyTextarea.value = licenseKey; // Populate the validation textarea
+            copyKeyBtn.classList.remove('hidden');
 
             showToast('라이선스 키 발급 성공!', 'success');
-            document.getElementById('step3').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            document.getElementById('step2').scrollIntoView({ behavior: 'smooth', block: 'center' });
         } catch (error) {
             showResult(issueResultEl, `❌ 키 발급 실패: ${error.message}`, 'error');
             showToast('키 발급 실패', 'error');
@@ -502,13 +405,14 @@
             showToast('검증할 키를 입력하세요.', 'error');
             return;
         }
-        
+
         setLoading(true);
         hideResult(validateResultEl);
-        
+
         const encodedKey = encodeURIComponent(licenseKey);
 
         try {
+            // UPDATED: Changed endpoint to match controller
             const response = await fetch(`${API_BASE_URL}/license/decode?licenseKey=${encodedKey}`);
             if (!response.ok) {
                 const errorText = await response.text();
@@ -526,10 +430,11 @@
         }
     }
 
+    // --- Utility Functions ---
     function setLoading(isLoading) {
         allButtons.forEach(button => button.disabled = isLoading);
     }
-    
+
     function hideResult(element) {
         element.classList.remove('is-visible');
     }
@@ -549,11 +454,28 @@
     }
 
     function copyToClipboard(text) {
-        navigator.clipboard.writeText(text).then(() => {
-            showToast('클립보드에 복사되었습니다!', 'success');
-        }).catch(err => {
-            showToast('복사에 실패했습니다.', 'error');
-        });
+        // navigator.clipboard is available only in secure contexts (HTTPS)
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('클립보드에 복사되었습니다!', 'success');
+            }).catch(err => {
+                showToast('복사에 실패했습니다.', 'error');
+            });
+        } else {
+            // Fallback for insecure contexts (HTTP)
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast('클립보드에 복사되었습니다!', 'success');
+            } catch (err) {
+                showToast('복사에 실패했습니다.', 'error');
+            }
+            document.body.removeChild(textArea);
+        }
     }
 
     function syntaxHighlight(json) {
@@ -575,8 +497,6 @@
         });
     }
 
-    // Initialize bitmask value on page load
-    document.addEventListener('DOMContentLoaded', updateBitmaskAndInputs);
 </script>
 
 </body>

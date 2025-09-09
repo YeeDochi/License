@@ -1,4 +1,4 @@
-package com.example.License.Service;
+package com.example.License.notUsed;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,8 +25,7 @@ public class KeyLoader {
     private String PRIVATE_KEY_STRING;
 
     @Value("${license.public-key}")
-    private String PUBLIC_KEY_STRING="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlZ60iu0ucDxPVnP85UI/8OlUE2IUsZUzagOJsA0Rp7/K5UI/A04oMv3uqVTS4uZcHQGlt3vwbPNWjpKQhLDPY+buISr0950iUdKVKkx3SlknGxFhSfZ5yNBzRwgaSf8emGVzZP3fBtzma4g3HJ7TItK0yZiXKisN6L7f+GvjEy6luIhyUbgy8rzrboZx0lPx1hkhs/PSda/gSjHeEdN7eM1/mSRv4i+iIAYhkHtMTcTA4jx0gM2aWL+5kUoa2dK/Y/FEEJY3xQmxa6xEqZc/C7dFw0RFInBL/BbmivVCFjWsUcoa3hOkPWiOVBFlSItyXtaDkvdLF7ntXej6Hn/v0QIDAQAB";
-
+    private String PUBLIC_KEY_STRING;
     public PrivateKey loadPrivateKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
         String privateKeyPem = PRIVATE_KEY_STRING;
         if (privateKeyPem == null) {

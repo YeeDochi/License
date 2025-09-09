@@ -3,10 +3,7 @@ package com.example.License.Entity;
 import java.sql.Timestamp;
 
 import com.example.License.DTO.LicenseRequestDTO;
-import com.example.License.Proto.LicenseProtos;
 import org.hibernate.annotations.CreationTimestamp;
-
-import com.example.License.notUsed.LicenseDTO;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,35 +23,28 @@ public class LicenseEntity {
 
 
     public LicenseEntity(LicenseRequestDTO dto) {
-        this.coreCount = dto.coreCount();
-        this.socketCount = dto.socketCount();
-        this.boardSerial = dto.boardSerial();
-        this.macAddress = dto.macAddress();
-        this.expireDate = dto.expireDate();
+        this.license_v = dto.license_v();
+        this.expiration = dto.expiration();
+        this.uuid= dto.uuid();
+        this.customerid = dto.customerid();
+        this.solution = dto.solution();
+        this.publicKey = dto.publicKey();
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Integer coreCount;
-    private Integer socketCount;
-    private String boardSerial;
-    private String macAddress;
-    private String expireDate;
-    private Integer type;
+    private String license_v;
+    private String expiration;
+    private String uuid;
+    private String customerid;
+    private String solution;
+    private String publicKey;
+
     @CreationTimestamp
     private Timestamp createDate;
 
-    public LicenseProtos.License toProto() {
-        return LicenseProtos.License.newBuilder()
-                .setCoreCount(this.coreCount != null ? this.coreCount : 0)
-                .setSocketCount(this.socketCount != null ? this.socketCount : 0)
-                .setBoardSerial(this.boardSerial != null ? this.boardSerial : "")
-                .setMacAddress(this.macAddress != null ? this.macAddress : "")
-                .setExpireDate(this.expireDate != null ? this.expireDate : "")
-                .setType(this.type != null ? this.type : 0)
-                .build();
-    }
+
 }
 
