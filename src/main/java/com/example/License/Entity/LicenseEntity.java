@@ -42,7 +42,7 @@ public class LicenseEntity {
     private String boardSerial;
     private String macAddress;
     private String expireDate;
-
+    private Integer type;
     @CreationTimestamp
     private Timestamp createDate;
 
@@ -53,6 +53,7 @@ public class LicenseEntity {
                 .setBoardSerial(this.boardSerial != null ? this.boardSerial : "")
                 .setMacAddress(this.macAddress != null ? this.macAddress : "")
                 .setExpireDate(this.expireDate != null ? this.expireDate : "")
+                .setType(this.type != null ? this.type : 0)
                 .build();
     }
 }

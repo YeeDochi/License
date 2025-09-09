@@ -42,14 +42,14 @@ public class LicenseController {
         LicenseEntity licenseEntity = licenseRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid license ID: " + id));
         LicenseProtos.License protoLicense = licenseEntity.toProto();
-        String newFormatted = newFormattedLicenseService.createLicenseKey(protoLicense,2);
+        String newFormatted = newFormattedLicenseService.createLicenseKey(protoLicense);
         return ResponseEntity.ok(newFormatted);
     }
 
    
     @GetMapping("/decode")
     public ResponseEntity<LicenseResponseDTO> decodeLicense(@RequestParam String licenseKey) throws Exception {
-        LicenseProtos.License decodedProto = newFormattedLicenseService.decodeLicenseKey(licenseKey, 1);
+        LicenseProtos.License decodedProto = newFormattedLicenseService.decodeLicenseKey(licenseKey);
         LicenseResponseDTO responseDto = LicenseResponseDTO.fromProto(decodedProto);
 
         return ResponseEntity.ok(responseDto);

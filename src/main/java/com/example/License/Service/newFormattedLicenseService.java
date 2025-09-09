@@ -34,93 +34,88 @@ public class newFormattedLicenseService {
     private int GCM_TAG_LENGTH;
 
     private final KeyLoader keyLoader;
+
+
     public String createLicenseKey(License license) throws Exception {
-        System.out.println("CreateKey License val: " + license);
-        byte[] rawData = license.toByteArray(); // 프로토콜 버퍼로 직렬화
-
-        byte[] iv = new byte[GCM_IV_LENGTH];
-        new SecureRandom().nextBytes(iv);
-        SecretKeySpec keySpec = new SecretKeySpec(SECRET_KEY.getBytes(StandardCharsets.UTF_8), "AES");
-        GCMParameterSpec gcmSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
-        Cipher cipher = Cipher.getInstance(SYMMETRIC_ALGORITHM);
-        cipher.init(Cipher.ENCRYPT_MODE, keySpec, gcmSpec);
-        byte[] encryptedData = cipher.doFinal(rawData);
-
-        ByteBuffer byteBuffer = ByteBuffer.allocate(iv.length + encryptedData.length);
-        byteBuffer.put(iv);
-        byteBuffer.put(encryptedData);
-
-        String base32Encoded = new Base32().encodeToString(byteBuffer.array());
-        String replacedPadding = base32Encoded.replace('=', '0');
-        return formatBase32ToKey(replacedPadding, DEFAULT_CHUNK_SIZE);
-    }
-
-    // --- 변경 후: 파라미터를 Protobuf 객체로 변경 ---
-    public String createLicenseKey(License license, int temp) throws Exception {
-        System.out.println("CreateKey License val: " + license + ", temp: " + temp);
         byte[] rawData = license.toByteArray();
 
-        int dataLength = rawData.length;
+        // 2. 원본 데이터 서명
         PrivateKey privateKey = keyLoader.loadPrivateKey();
         Signature ecdsaSign = Signature.getInstance(ASYMMETRIC_SIGNATURE_ALGORITHM);
         ecdsaSign.initSign(privateKey);
         ecdsaSign.update(rawData);
         byte[] signature = ecdsaSign.sign();
 
-        ByteBuffer byteBuffer = ByteBuffer.allocate(2 + dataLength + signature.length);
-        byteBuffer.putShort((short) dataLength);
-        byteBuffer.put(rawData);
-        byteBuffer.put(signature);
-        byte[] finalBytes = byteBuffer.array(); // 데이터의 길이, 데이터, 서명 합치기
+        // 3. [원본 데이터 + 서명]을 하나의 덩어리로 결합
+        // 구조: [rawData 길이(short)] + [rawData] + [signature]
+        ByteBuffer dataToEncryptBuffer = ByteBuffer.allocate(2 + rawData.length + signature.length);
+        dataToEncryptBuffer.putShort((short) rawData.length);
+        dataToEncryptBuffer.put(rawData);
+        dataToEncryptBuffer.put(signature);
+        byte[] dataToEncrypt = dataToEncryptBuffer.array();
 
-        String base32Encoded = new Base32().encodeToString(finalBytes);
+        // 4. 결합된 덩어리 전체를 암호화
+        byte[] iv = new byte[GCM_IV_LENGTH];
+        new SecureRandom().nextBytes(iv);
+        SecretKeySpec keySpec = new SecretKeySpec(SECRET_KEY.getBytes(StandardCharsets.UTF_8), "AES");
+        GCMParameterSpec gcmSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
+        Cipher cipher = Cipher.getInstance(SYMMETRIC_ALGORITHM);
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec, gcmSpec);
+        byte[] encryptedData = cipher.doFinal(dataToEncrypt);
+
+        // 5. 최종 결과물: [iv] + [암호화된 데이터]
+        ByteBuffer finalBuffer = ByteBuffer.allocate(iv.length + encryptedData.length);
+        finalBuffer.put(iv);
+        finalBuffer.put(encryptedData);
+
+        String base32Encoded = new Base32().encodeToString(finalBuffer.array());
         String replacedPadding = base32Encoded.replace('=', '0');
         return formatBase32ToKey(replacedPadding, DEFAULT_CHUNK_SIZE);
-    }
 
+    }
     public License decodeLicenseKey(String formattedKey) throws Exception {
         String base32Encoded = formattedKey.replace("-", "").toUpperCase().replaceAll("=", "");
         String restoredBase32 = base32Encoded.replace('0', '=');
         byte[] finalBytes = new Base32().decode(restoredBase32);
+
+        // 1. [iv]와 [암호화된 데이터] 분리
         ByteBuffer byteBuffer = ByteBuffer.wrap(finalBytes);
         byte[] iv = new byte[GCM_IV_LENGTH];
         byteBuffer.get(iv);
         byte[] encryptedData = new byte[byteBuffer.remaining()];
         byteBuffer.get(encryptedData);
 
+        // 2. 데이터 복호화 (AES/GCM)
         SecretKeySpec keySpec = new SecretKeySpec(SECRET_KEY.getBytes(StandardCharsets.UTF_8), "AES");
         GCMParameterSpec gcmSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
         Cipher cipher = Cipher.getInstance(SYMMETRIC_ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, keySpec, gcmSpec);
-        byte[] decryptedData = cipher.doFinal(encryptedData);
+        // 복호화 결과물: [rawData 길이] + [rawData] + [signature]
+        byte[] decryptedBytes = cipher.doFinal(encryptedData);
 
-        return License.parseFrom(decryptedData);
-    }
+        // 3. [rawData]와 [signature] 분리
+        ByteBuffer decryptedBuffer = ByteBuffer.wrap(decryptedBytes);
+        short rawDataLength = decryptedBuffer.getShort();
+        byte[] rawData = new byte[rawDataLength];
+        decryptedBuffer.get(rawData);
+        byte[] signature = new byte[decryptedBuffer.remaining()];
+        decryptedBuffer.get(signature);
 
-    public License decodeLicenseKey(String formattedKey, int temp) throws Exception {
-        String base32Encoded = formattedKey.replace("-", "").toUpperCase().replaceAll("=", "");
-        String restoredBase32 = base32Encoded.replace('0', '=');
-        byte[] finalBytes = new Base32().decode(restoredBase32);
-        ByteBuffer byteBuffer = ByteBuffer.wrap(finalBytes);
-
-        short dataLength = byteBuffer.getShort();
-        byte[] rawData = new byte[dataLength];
-        byteBuffer.get(rawData);
-        byte[] signature = new byte[byteBuffer.remaining()];
-        byteBuffer.get(signature);
-
+        // 4. 서명 검증 (RSA)
+        KeyLoader keyLoader = new KeyLoader();
         PublicKey publicKey = keyLoader.loadPublicKey();
         Signature ecdsaVerify = Signature.getInstance(ASYMMETRIC_SIGNATURE_ALGORITHM);
         ecdsaVerify.initVerify(publicKey);
+        // 원본 데이터(rawData)로 서명을 검증
         ecdsaVerify.update(rawData);
         boolean isValid = ecdsaVerify.verify(signature);
 
         if (isValid) {
-            System.out.println("유효한 라이선스입니다.");
+            // 검증 성공 시 원본 데이터를 Protobuf 객체로 변환하여 반환
             return License.parseFrom(rawData);
         } else {
-            System.out.println("위조된 라이선스입니다!");
-            throw new SecurityException("Invalid license key signature.");
+            // 서명 검증 실패 시 null 반환
+            return null;
         }
     }
 

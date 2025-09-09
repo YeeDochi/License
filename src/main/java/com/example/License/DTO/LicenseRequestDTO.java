@@ -6,5 +6,6 @@ public record LicenseRequestDTO(
     Integer socketCount,
     String boardSerial,
     String macAddress,
-    String expireDate
+    String expireDate,
+    Integer type
 ) {}

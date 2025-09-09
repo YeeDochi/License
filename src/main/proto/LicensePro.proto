@@ -6,6 +6,7 @@ option java_package = "com.example.License.Proto";
 option java_outer_classname = "LicenseProtos";
 
 message License {
+  int32 type =1;
   int32 core_count = 2;
   int32 socket_count = 3;
   string board_serial = 4;

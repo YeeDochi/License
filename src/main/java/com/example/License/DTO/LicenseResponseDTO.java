@@ -8,7 +8,8 @@ public record LicenseResponseDTO(
         int socketCount,
         String boardSerial,
         String macAddress,
-        String expireDate
+        String expireDate,
+        int type
 ) {
     // Protobuf 객체를 이 DTO로 변환
     public static LicenseResponseDTO fromProto(License proto) {
@@ -17,7 +18,8 @@ public record LicenseResponseDTO(
                 proto.getSocketCount(),
                 proto.getBoardSerial(),
                 proto.getMacAddress(),
-                proto.getExpireDate()
+                proto.getExpireDate(),
+                proto.getType()
         );
     }
 }
