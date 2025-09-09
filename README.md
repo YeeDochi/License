@@ -105,27 +105,4 @@
 
 -   **오류 응답**: 서명이 유효하지 않으면 서버 오류가 발생합니다.
 
----
-
-## ⚙️ 실행 방법
-
-1.  **사전 요구사항**:
-    * Java (JDK) 17 이상
-    * Maven
-    * `application.properties`에 구성된 실행 중인 데이터베이스 인스턴스 (H2, PostgreSQL, MySQL 등).
-
-2.  **리포지토리 복제**:
-    ~~~bash
-    git clone <repository-url>
-    cd <project-directory>
-    ~~~
-
-3.  **데이터베이스 구성**:
-    `src/main/resources/application.properties` 파일을 열고 데이터베이스 연결 세부 정보를 구성합니다.
-
-4.  **애플리케이션 빌드 및 실행**:
-    ~~~bash
-    mvn spring-boot:run
-    ~~~
-
 애플리케이션은 구성된 포트(8081)에서 시작됩니다.
