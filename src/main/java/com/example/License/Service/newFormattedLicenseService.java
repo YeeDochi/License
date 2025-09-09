@@ -39,14 +39,14 @@ public class newFormattedLicenseService {
     public String createLicenseKey(License license) throws Exception {
         byte[] rawData = license.toByteArray();
 
-        // 2. 원본 데이터 서명
+        // 원본 데이터 서명
         PrivateKey privateKey = keyLoader.loadPrivateKey();
         Signature ecdsaSign = Signature.getInstance(ASYMMETRIC_SIGNATURE_ALGORITHM);
         ecdsaSign.initSign(privateKey);
         ecdsaSign.update(rawData);
         byte[] signature = ecdsaSign.sign();
 
-        // 3. [원본 데이터 + 서명]을 하나의 덩어리로 결합
+        // [원본 데이터 + 서명]을 하나의 덩어리로 결합
         // 구조: [rawData 길이(short)] + [rawData] + [signature]
         ByteBuffer dataToEncryptBuffer = ByteBuffer.allocate(2 + rawData.length + signature.length);
         dataToEncryptBuffer.putShort((short) rawData.length);
@@ -54,7 +54,7 @@ public class newFormattedLicenseService {
         dataToEncryptBuffer.put(signature);
         byte[] dataToEncrypt = dataToEncryptBuffer.array();
 
-        // 4. 결합된 덩어리 전체를 암호화
+        // 결합된 덩어리 전체를 암호화
         byte[] iv = new byte[GCM_IV_LENGTH];
         new SecureRandom().nextBytes(iv);
         SecretKeySpec keySpec = new SecretKeySpec(SECRET_KEY.getBytes(StandardCharsets.UTF_8), "AES");
@@ -63,7 +63,7 @@ public class newFormattedLicenseService {
         cipher.init(Cipher.ENCRYPT_MODE, keySpec, gcmSpec);
         byte[] encryptedData = cipher.doFinal(dataToEncrypt);
 
-        // 5. 최종 결과물: [iv] + [암호화된 데이터]
+        // 최종 결과물- [iv] + [암호화된 데이터]
         ByteBuffer finalBuffer = ByteBuffer.allocate(iv.length + encryptedData.length);
         finalBuffer.put(iv);
         finalBuffer.put(encryptedData);
@@ -78,14 +78,14 @@ public class newFormattedLicenseService {
         String restoredBase32 = base32Encoded.replace('0', '=');
         byte[] finalBytes = new Base32().decode(restoredBase32);
 
-        // 1. [iv]와 [암호화된 데이터] 분리
+        // [iv]와 [암호화된 데이터] 분리
         ByteBuffer byteBuffer = ByteBuffer.wrap(finalBytes);
         byte[] iv = new byte[GCM_IV_LENGTH];
         byteBuffer.get(iv);
         byte[] encryptedData = new byte[byteBuffer.remaining()];
         byteBuffer.get(encryptedData);
 
-        // 2. 데이터 복호화 (AES/GCM)
+        // 데이터 복호화 (AES/GCM)
         SecretKeySpec keySpec = new SecretKeySpec(SECRET_KEY.getBytes(StandardCharsets.UTF_8), "AES");
         GCMParameterSpec gcmSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
         Cipher cipher = Cipher.getInstance(SYMMETRIC_ALGORITHM);
@@ -93,7 +93,7 @@ public class newFormattedLicenseService {
         // 복호화 결과물: [rawData 길이] + [rawData] + [signature]
         byte[] decryptedBytes = cipher.doFinal(encryptedData);
 
-        // 3. [rawData]와 [signature] 분리
+        // [rawData]와 [signature] 분리
         ByteBuffer decryptedBuffer = ByteBuffer.wrap(decryptedBytes);
         short rawDataLength = decryptedBuffer.getShort();
         byte[] rawData = new byte[rawDataLength];
@@ -101,7 +101,7 @@ public class newFormattedLicenseService {
         byte[] signature = new byte[decryptedBuffer.remaining()];
         decryptedBuffer.get(signature);
 
-        // 4. 서명 검증 (RSA)
+        // 서명 검증 (RSA)
         KeyLoader keyLoader = new KeyLoader();
         PublicKey publicKey = keyLoader.loadPublicKey();
         Signature ecdsaVerify = Signature.getInstance(ASYMMETRIC_SIGNATURE_ALGORITHM);
